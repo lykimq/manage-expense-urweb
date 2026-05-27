@@ -1,0 +1,72 @@
+/* Dashboard page: header, panels, and expense tables */
+
+main > header {
+  margin-bottom: var(--space-md);
+}
+
+main > header p {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+main > article {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+main > article:last-child {
+  margin-bottom: 0;
+}
+
+main > article h2 {
+  margin: 0 0 14px;
+  font-size: 1.15rem;
+  color: var(--color-nav);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 10px;
+}
+
+main > article table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 1px solid var(--color-border);
+}
+
+main > article th,
+main > article td {
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+main > article th {
+  background: #f3f4f6;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #374151;
+}
+
+main > article td:nth-child(1) {
+  width: 70px;
+}
+
+main > article td:nth-child(3) {
+  width: 110px;
+  font-weight: 600;
+}
+
+main > article td:nth-child(4) {
+  width: 120px;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+main > article tbody tr:hover td {
+  background: #f9fafb;
+}

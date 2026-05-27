@@ -1,0 +1,17 @@
+# Build output
+*.exe
+*.o
+*.c
+*.js
+
+# Generated SQL (regenerate with: make schema)
+schema/schema.sql
+
+# Editor / OS
+*~
+.*.swp
+.DS_Store
+
+# Nix
+result
+result-*

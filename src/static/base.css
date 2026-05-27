@@ -1,0 +1,69 @@
+/* Shared layout and home page */
+
+:root {
+  --color-bg: #f6f8fb;
+  --color-surface: #ffffff;
+  --color-border: #d1d5db;
+  --color-text: #1f2937;
+  --color-muted: #4b5563;
+  --color-nav: #111827;
+  --radius: 12px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+nav {
+  background: var(--color-nav);
+  padding: 12px 20px;
+}
+
+nav a {
+  color: #f9fafb;
+  text-decoration: none;
+  margin-right: var(--space-md);
+  font-weight: 600;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+main {
+  max-width: 960px;
+  margin: var(--space-lg) auto;
+  padding: 0 var(--space-md) 32px;
+}
+
+h1,
+h2 {
+  margin-top: 0;
+}
+
+/* Home hero */
+
+main > section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 36px var(--space-lg);
+  text-align: center;
+}
+
+main > section p {
+  max-width: 680px;
+  margin: 12px auto 0;
+  line-height: 1.6;
+  color: var(--color-muted);
+}

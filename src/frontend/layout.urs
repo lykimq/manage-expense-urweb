@@ -1,0 +1,1 @@
+val wrap : string -> xbody -> transaction page
