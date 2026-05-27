@@ -10,11 +10,13 @@ EXE        := $(PROJECT).exe
 SQL        := schema/schema.sql
 EXTRA_SQL  := schema/extra.sql
 SEED_SQL   := schema/seed.sql
-URL        := http://localhost:$(PORT)/Main/home
+URL        := http://localhost:$(PORT)/Main/login
 SQL_TABLE  := uw_tables_expenses
 
 APP_SRCS   := $(wildcard src/*.ur) \
               $(wildcard src/*.urs) \
+              $(wildcard src/workflow/*.ur) \
+              $(wildcard src/workflow/*.urs) \
               $(wildcard src/frontend/*.ur) \
               $(wildcard src/frontend/*.urs) \
               $(wildcard schema/*.ur) \

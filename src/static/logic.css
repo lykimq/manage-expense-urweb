@@ -1,0 +1,43 @@
+/* Login page specific styles */
+
+main > article > header > h2 {
+  margin-bottom: 8px;
+}
+
+main > article > header > p {
+  color: var(--color-muted);
+}
+
+main > article > header > ul {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  color: var(--color-muted);
+}
+
+main > article > header > ul li {
+  margin: 4px 0;
+}
+
+main > article > header + form {
+  max-width: 520px;
+  margin: 20px auto 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 6px 18px rgba(17, 24, 39, 0.08);
+}
+
+main > article > header + form p {
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+main > article > header + form p:last-child {
+  justify-content: center;
+}
+
+main > article > header + form input[type="submit"] {
+  width: 100%;
+}

@@ -5,13 +5,16 @@ sql schema/schema.sql
 file /base.css src/static/base.css
 file /dashboard.css src/static/dashboard.css
 file /expense.css src/static/expense.css
+file /logic.css src/static/logic.css
 file /expense-detail.css src/static/expense_detail.css
 file /approval-queue.css src/static/approval_queue.css
 allow url /base.css
 allow url /dashboard.css
 allow url /expense.css
+allow url /logic.css
 allow url /expense-detail.css
 allow url /approval-queue.css
+allow url /Main/login
 allow url /Main/home
 allow url /Main/create
 allow url /Main/detail
@@ -24,6 +27,7 @@ src/workflow/state
 src/workflow/transition
 src/expense
 src/frontend/layout
+src/frontend/login
 src/frontend/dashboard
 src/frontend/create_expense
 src/frontend/expense_detail

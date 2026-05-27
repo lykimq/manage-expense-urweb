@@ -1,3 +1,5 @@
+fun login () = Login.page ()
+
 fun home () = Home.page ()
 
 fun create () = Create_expense.page ()

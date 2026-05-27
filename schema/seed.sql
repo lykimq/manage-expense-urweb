@@ -1,10 +1,13 @@
--- Sample users (Employee, Manager, Finance).
+-- Sample users used as login references (email + role).
 INSERT INTO uw_tables_users (uw_id, uw_fullname, uw_role, uw_email)
 VALUES
   (1, 'Quyen Ly', 'Employee', 'quyen_ly@example.com'),
   (2, 'Boss', 'Manager', 'boss@example.com'),
-  (3, 'Secretary', 'Secretary', 'secretary@example.com')
-ON CONFLICT (uw_id) DO NOTHING;
+  (3, 'Finance Team', 'Finance', 'finance@example.com')
+ON CONFLICT (uw_id) DO UPDATE
+SET uw_fullname = EXCLUDED.uw_fullname,
+    uw_role = EXCLUDED.uw_role,
+    uw_email = EXCLUDED.uw_email;
 
 -- Sample expenses in different states.
 INSERT INTO uw_tables_expenses
