@@ -8,6 +8,7 @@ CREATEDB ?= createdb
 URP        := $(PROJECT).urp
 EXE        := $(PROJECT).exe
 SQL        := schema/schema.sql
+EXTRA_SQL  := schema/extra.sql
 URL        := http://localhost:$(PORT)/Main/home
 SQL_TABLE  := uw_tables_expenses
 
@@ -41,6 +42,9 @@ db: $(SQL)
 		echo "db: schema already applied ($(DB))"; \
 	else \
 		$(PSQL) -v ON_ERROR_STOP=1 -f $(SQL) $(DB); \
+	fi
+	@if [ -f "$(EXTRA_SQL)" ]; then \
+		$(PSQL) -v ON_ERROR_STOP=1 -f $(EXTRA_SQL) $(DB); \
 	fi
 
 web: db $(EXE)
