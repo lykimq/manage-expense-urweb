@@ -6,4 +6,4 @@
 make web        # build + db + run dev server on port 8081
 ```
 
-Open: **http://localhost:8081/Main/main**
+Open: **http://localhost:8081/Main/home**
