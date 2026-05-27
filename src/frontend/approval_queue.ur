@@ -1,11 +1,11 @@
 (* Approval queue placeholder page *)
 
-fun queueRow expenseId title date amount category state =
+fun queueRow expenseId title created amount category state =
     <xml>
       <tr>
         <td>{[show expenseId]}</td>
         <td>{[title]}</td>
-        <td>{[date]}</td>
+        <td>{[created]}</td>
         <td>{[show amount]}</td>
         <td>{[category]}</td>
         <td>{[state]}</td>
@@ -27,7 +27,7 @@ fun content () =
             <tr>
               <th>ID</th>
               <th>Title</th>
-              <th>Date</th>
+              <th>Created</th>
               <th>Amount</th>
               <th>Category</th>
               <th>State</th>

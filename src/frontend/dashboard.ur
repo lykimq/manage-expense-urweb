@@ -9,7 +9,7 @@ fun panel title rows =
             <tr>
               <th>ID</th>
               <th>Title</th>
-              <th>Date</th>
+              <th>Created</th>
               <th>Amount</th>
               <th>Category</th>
               <th>State</th>
@@ -22,12 +22,12 @@ fun panel title rows =
       </article>
     </xml>
 
-fun row id title date amount category state =
+fun row id title created amount category state =
     <xml>
       <tr>
         <td>{[show id]}</td>
         <td>{[title]}</td>
-        <td>{[date]}</td>
+        <td>{[created]}</td>
         <td>{[show amount]}</td>
         <td>{[category]}</td>
         <td>{[state]}</td>

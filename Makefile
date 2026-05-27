@@ -8,8 +8,8 @@ CREATEDB ?= createdb
 URP        := $(PROJECT).urp
 EXE        := $(PROJECT).exe
 SQL        := schema/schema.sql
-URL        := http://localhost:$(PORT)/Main/dashboard
-SQL_TABLE  := uw_tables_expense
+URL        := http://localhost:$(PORT)/Main/home
+SQL_TABLE  := uw_tables_expenses
 
 APP_SRCS   := $(wildcard src/*.ur) \
               $(wildcard src/*.urs) \

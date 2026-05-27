@@ -2,7 +2,6 @@
 
 fun hasRequiredFields r =
     r.Title <> ""
-    && r.Date <> ""
     && r.Amount <> ""
     && r.Category <> ""
     && (case r.Action of
@@ -18,7 +17,7 @@ fun missingFieldsPage () =
         </header>
         <article>
           <p>
-            Required fields are Title, Date, Amount, Category, and Action.
+            Required fields are Title, Amount, Category, and Action.
           </p>
           <p>
             <a href="/Main/home">Back to Home</a>
@@ -51,10 +50,6 @@ fun content () =
             <tr>
               <th><label>Title *</label></th>
               <td><textbox{#Title}/></td>
-            </tr>
-            <tr>
-              <th><label>Date *</label></th>
-              <td><textbox{#Date}/></td>
             </tr>
             <tr>
               <th><label>Amount *</label></th>

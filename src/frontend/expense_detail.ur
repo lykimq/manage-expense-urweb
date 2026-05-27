@@ -15,7 +15,7 @@ fun content expenseId =
             <td>Lunch with client</td>
           </tr>
           <tr>
-            <th>Date</th>
+            <th>Created</th>
             <td>2026-05-27</td>
           </tr>
           <tr>
@@ -47,10 +47,33 @@ fun content expenseId =
 
       <article>
         <h2>Audit Timeline</h2>
-        <ol>
-          <li>2026-05-27 09:10 - Created as Draft</li>
-          <li>2026-05-27 09:22 - Submitted by Employee Demo</li>
-        </ol>
+        <table>
+          <thead>
+            <tr>
+              <th>Stamp</th>
+              <th>OldState</th>
+              <th>NewState</th>
+              <th>Comment</th>
+              <th>Actor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2026-05-27 09:10</td>
+              <td>Draft</td>
+              <td>Draft</td>
+              <td>Initial creation</td>
+              <td>Employee Demo</td>
+            </tr>
+            <tr>
+              <td>2026-05-27 09:22</td>
+              <td>Draft</td>
+              <td>Submitted</td>
+              <td>Submitted for manager review</td>
+              <td>Employee Demo</td>
+            </tr>
+          </tbody>
+        </table>
       </article>
 
       <article>
