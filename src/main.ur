@@ -5,3 +5,5 @@ fun create () = Create_expense.page ()
 fun dashboard () = Dashboard.page ()
 
 fun detail () = Expense_detail.page 1
+
+fun queue () = Approval_queue.page ()

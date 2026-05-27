@@ -1,0 +1,17 @@
+/* Approval queue page styles */
+
+main > article > table th:last-child,
+main > article > table td:last-child {
+  width: 90px;
+  text-align: center;
+}
+
+main > article > table td:last-child a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+main > article > table td:last-child a:hover {
+  text-decoration: underline;
+}
