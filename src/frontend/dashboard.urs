@@ -1,7 +1,11 @@
-(** Dashboard placeholder (my expenses, approvals, payments). *)
+(** Dashboard markup; loads data via Dashboard_service. *)
 
-(* Body fragment without page wrapper. *)
-val content : unit -> xbody
+type user_info = {FullName : string, Role : string, Email : string}
 
-(* Full page via Layout.wrap. *)
+(* Workspace section for home; caller supplies session user id. *)
+val contentForRole :
+    user_info -> int -> transaction xbody
+
+(* Standalone /Main/dashboard page. *)
+val content : unit -> transaction xbody
 val page : unit -> transaction page

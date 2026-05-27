@@ -2,24 +2,23 @@ fun renderUserCard info =
     <xml>
       <article>
         <h2>Welcome, {[info.FullName]}</h2>
-        <p>You are logged in successfully.</p>
         <p><b>Role:</b> {[info.Role]}</p>
         <p><b>Email:</b> {[info.Email]}</p>
       </article>
     </xml>
 
 fun page info =
+    userId <- Session.requireUser ();
+    workspace <- Dashboard.contentForRole info userId;
     Layout.wrap "Expense Management System"
       <xml>
         <section>
-          <h1>Welcome to the Expense Management System</h1>
+          <h1>Expense Management</h1>
           <p>
-            This demo shows a correctness-focused workflow app built with Ur/Web
-            and PostgreSQL.
+            Workflow demo: submit, approve or reject, then mark paid.
+            All actions are logged.
           </p>
         </section>
-
         {renderUserCard info}
-        {Create_expense.content ()}
-        {Dashboard.content ()}
+        {workspace}
       </xml>

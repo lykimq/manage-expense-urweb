@@ -23,10 +23,10 @@ fun dashboard () =
     _ <- Session.requireUser ();
     Dashboard.page ()
 
-fun detail () =
-    Log.info "main" "GET /Main/detail";
+fun detail id =
+    Log.info "main" ("GET /Main/detail id=" ^ show id);
     _ <- Session.requireUser ();
-    Expense_detail.page 1
+    Expense_detail.page id
 
 fun queue () =
     Log.info "main" "GET /Main/queue";

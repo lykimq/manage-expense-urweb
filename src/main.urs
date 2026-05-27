@@ -16,7 +16,7 @@ val create : unit -> transaction page
 val dashboard : unit -> transaction page
 
 (* Expense detail placeholder; any logged-in role. *)
-val detail : unit -> transaction page
+val detail : int -> transaction page
 
 (* Approval queue placeholder; Manager only. *)
 val queue : unit -> transaction page

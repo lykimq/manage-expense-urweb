@@ -45,7 +45,7 @@ nav a:hover {
   text-decoration: underline;
 }
 
-nav > span:last-child a {
+nav>span:last-child a {
   margin-right: 0;
 }
 
@@ -62,7 +62,7 @@ h2 {
 
 /* Home hero */
 
-main > section {
+main>section {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -71,26 +71,21 @@ main > section {
   margin-bottom: var(--space-lg);
 }
 
-main > section p {
+main>section p {
   max-width: 680px;
   margin: 12px auto 0;
   line-height: 1.6;
   color: var(--color-muted);
 }
 
-main > section + header {
+main>section+header {
   margin-top: var(--space-lg);
 }
 
-main > section a,
-main > header a {
+main>section a,
+main>header a {
   display: inline-block;
   text-decoration: none;
   color: var(--color-primary);
   font-weight: 600;
-}
-
-main > section a:hover,
-main > header a:hover {
-  text-decoration: underline;
 }

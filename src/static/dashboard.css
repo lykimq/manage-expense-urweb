@@ -74,7 +74,3 @@ main>article>table td:nth-child(6) {
   color: var(--color-primary);
   font-weight: 600;
 }
-
-main>article>table tbody tr:hover td {
-  background: #f9fafb;
-}

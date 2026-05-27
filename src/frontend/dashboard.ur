@@ -1,6 +1,30 @@
-(* Dashboard page *)
+(* Dashboard markup only; data from Dashboard_service. *)
 
-fun panel title rows =
+fun formatCreated stamp =
+    show stamp
+
+fun formatAmount amount =
+    Amount.amountToString amount
+
+fun expenseRow e =
+    <xml>
+      <tr>
+        <td>{[show e.Id]}</td>
+        <td>{[e.Title]}</td>
+        <td>{[formatCreated e.CreatedAt]}</td>
+        <td>{[formatAmount e.Amount]}</td>
+        <td>{[e.Category]}</td>
+        <td>{[e.State]}</td>
+        <td><a href={bless ("/Main/detail/" ^ show e.Id)}>View</a></td>
+      </tr>
+    </xml>
+
+fun expenseRows exps =
+    case exps of
+        [] => <xml><tr><td><span>No expenses to show.</span></td></tr></xml>
+      | e :: es => <xml>{expenseRow e}{expenseRows es}</xml>
+
+fun panel title tableRows =
     <xml>
       <article>
         <h2>{[title]}</h2>
@@ -13,50 +37,69 @@ fun panel title rows =
               <th>Amount</th>
               <th>Category</th>
               <th>State</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            {rows}
+            {tableRows}
           </tbody>
         </table>
       </article>
     </xml>
 
-fun row id title created amount category state =
-    <xml>
-      <tr>
-        <td>{[show id]}</td>
-        <td>{[title]}</td>
-        <td>{[created]}</td>
-        <td>{[show amount]}</td>
-        <td>{[category]}</td>
-        <td>{[state]}</td>
-      </tr>
-    </xml>
+fun roleActions role =
+    case role of
+        "Employee" =>
+        <xml>
+          <p>
+            <a href={bless "/Main/create"}>Submit new expense</a>
+          </p>
+        </xml>
+      | "Manager" =>
+        <xml>
+          <p>
+            <a href={bless "/Main/queue"}>Open approval queue</a>
+          </p>
+        </xml>
+      | "Finance" =>
+        <xml>
+          <p>Mark expenses paid from each expense detail page.</p>
+        </xml>
+      | _ => <xml><p></p></xml>
+
+fun roleIntro role =
+    case role of
+        "Employee" =>
+        <xml>
+          <p>Submit a new expense, then track status in the table below.</p>
+        </xml>
+      | "Manager" =>
+        <xml>
+          <p>Review Submitted expenses below or use the approval queue.</p>
+        </xml>
+      | "Finance" =>
+        <xml>
+          <p>Approved expenses ready for payment are listed below.</p>
+        </xml>
+      | _ => <xml><p></p></xml>
+
+fun contentForRole info userId =
+    workspace <- Dashboard_service.loadWorkspace info.Role userId;
+    return
+      <xml>
+        <header>
+          <h1>Your workspace</h1>
+          {roleIntro info.Role}
+          {roleActions info.Role}
+        </header>
+        {panel workspace.PanelTitle (expenseRows workspace.Expenses)}
+      </xml>
 
 fun content () =
-    <xml>
-      <header>
-        <h1>Dashboard</h1>
-        <p>Overview of all expenses</p>
-      </header>
-
-      {panel "My Expenses"
-         <xml>
-           {row 1 "Lunch with client" "2026-05-27" 42.50 "Travel" "Submitted"}
-           {row 2 "Train tickets" "2026-05-26" 100.00 "Travel" "Submitted"}
-         </xml>}
-
-      {panel "Pending Approvals"
-         <xml>
-           {row 3 "Office supplies" "2026-05-25" 120.00 "Office" "Submitted"}
-         </xml>}
-
-      {panel "Pending Payments"
-         <xml>
-           {row 4 "Laptop" "2026-05-20" 1200.00 "Equipment" "Approved"}
-         </xml>}
-    </xml>
+    userInfo <- Session.requireUserInfo ();
+    userId <- Session.requireUser ();
+    contentForRole userInfo userId
 
 fun page () =
-    Layout.wrap "Dashboard" (content ())
+    body <- content ();
+    Layout.wrap "Dashboard" body
