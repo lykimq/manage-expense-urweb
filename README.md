@@ -3,7 +3,8 @@
 ## Quick start
 
 ```bash
-make web        # build + db + run dev server on port 8081
+make db         # setup database (schema + constraints + seed)
+make web        # build and run dev server on port 8081
 ```
 
 Open: **http://localhost:8081/Main/home**

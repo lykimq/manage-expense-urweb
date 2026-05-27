@@ -20,15 +20,15 @@ APP_SRCS   := $(wildcard src/*.ur) \
               $(wildcard schema/*.ur) \
               $(wildcard schema/*.urs)
 
-.PHONY: all help web test db seed clean
+.PHONY: all help web test db seed check-db clean
 
 all: help
 
 help:
 	@echo "Targets:"
-	@echo "  make web      Run dev server (auto rebuild on changes)"
-	@echo "  make db       Generate schema SQL and apply to DB"
-	@echo "  make seed     Insert sample users/expenses/audit rows"
+	@echo "  make db       Setup database (schema + constraints + seed)"
+	@echo "  make web      Build and run dev server (auto rebuild app only)"
+	@echo "  make seed     Re-apply sample data (requires db)"
 	@echo "  make test     Build, run server briefly, and smoke test"
 	@echo "  make clean    Remove app.exe and generated SQL"
 
@@ -38,18 +38,31 @@ $(EXE): $(URP) $(APP_SRCS)
 $(SQL): $(URP) $(APP_SRCS)
 	$(URWEB) $(PROJECT)
 
+# One-time database setup: generate schema, apply tables, constraints, seed.
 db: $(SQL)
 	-$(CREATEDB) $(DB) 2>/dev/null || true
 	@if $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(SQL_TABLE)'" $(DB) | grep -q 1; then \
-		echo "db: schema already applied ($(DB))"; \
+		echo "db: tables already exist ($(DB))"; \
 	else \
+		echo "db: applying schema ($(DB))"; \
 		$(PSQL) -v ON_ERROR_STOP=1 -f $(SQL) $(DB); \
 	fi
 	@if [ -f "$(EXTRA_SQL)" ]; then \
 		$(PSQL) -v ON_ERROR_STOP=1 -f $(EXTRA_SQL) $(DB); \
 	fi
+	@if [ -f "$(SEED_SQL)" ]; then \
+		$(PSQL) -v ON_ERROR_STOP=1 -f $(SEED_SQL) $(DB); \
+	fi
+	@echo "db: ready ($(DB))"
 
-seed: db
+# Lightweight check used by web/test; does not modify the database.
+check-db:
+	@if ! $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(SQL_TABLE)'" $(DB) 2>/dev/null | grep -q 1; then \
+		echo "db: not ready. Run 'make db' first."; \
+		exit 1; \
+	fi
+
+seed: check-db
 	@if [ -f "$(SEED_SQL)" ]; then \
 		$(PSQL) -v ON_ERROR_STOP=1 -f $(SEED_SQL) $(DB); \
 		echo "seed: sample data applied ($(DB))"; \
@@ -58,7 +71,7 @@ seed: db
 		exit 1; \
 	fi
 
-web: db $(EXE)
+web: check-db $(EXE)
 	@url="$(URL)"; \
 	if ! command -v inotifywait >/dev/null 2>&1; then \
 		echo "inotifywait not found. Install inotify-tools to use auto rebuild in make web."; \
@@ -68,7 +81,7 @@ web: db $(EXE)
 	printf '\033]8;;%s\033\\%s\033]8;;\033\\\n' "$$url" "$$url"; \
 	printf '  (or %s)\n\n' "$$url"; \
 	while true; do \
-		if $(MAKE) --no-print-directory db $(EXE); then \
+		if $(MAKE) --no-print-directory $(EXE); then \
 			./$(EXE) -p $(PORT) & pid=$$!; \
 		else \
 			pid=""; \
@@ -78,10 +91,10 @@ web: db $(EXE)
 			kill $$pid 2>/dev/null || true; \
 			wait $$pid 2>/dev/null || true; \
 		fi; \
-		echo "Change detected. Rebuilding..."; \
+		echo "Change detected. Rebuilding app..."; \
 	done
 
-test: db $(EXE)
+test: check-db $(EXE)
 	@./$(EXE) -p $(PORT) & \
 	pid=$$!; \
 	sleep 1; \
