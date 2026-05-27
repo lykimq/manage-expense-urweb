@@ -9,6 +9,7 @@ URP        := $(PROJECT).urp
 EXE        := $(PROJECT).exe
 SQL        := schema/schema.sql
 EXTRA_SQL  := schema/extra.sql
+SEED_SQL   := schema/seed.sql
 URL        := http://localhost:$(PORT)/Main/home
 SQL_TABLE  := uw_tables_expenses
 
@@ -19,7 +20,7 @@ APP_SRCS   := $(wildcard src/*.ur) \
               $(wildcard schema/*.ur) \
               $(wildcard schema/*.urs)
 
-.PHONY: all help web test db clean
+.PHONY: all help web test db seed clean
 
 all: help
 
@@ -27,6 +28,7 @@ help:
 	@echo "Targets:"
 	@echo "  make web      Run dev server (auto rebuild on changes)"
 	@echo "  make db       Generate schema SQL and apply to DB"
+	@echo "  make seed     Insert sample users/expenses/audit rows"
 	@echo "  make test     Build, run server briefly, and smoke test"
 	@echo "  make clean    Remove app.exe and generated SQL"
 
@@ -45,6 +47,15 @@ db: $(SQL)
 	fi
 	@if [ -f "$(EXTRA_SQL)" ]; then \
 		$(PSQL) -v ON_ERROR_STOP=1 -f $(EXTRA_SQL) $(DB); \
+	fi
+
+seed: db
+	@if [ -f "$(SEED_SQL)" ]; then \
+		$(PSQL) -v ON_ERROR_STOP=1 -f $(SEED_SQL) $(DB); \
+		echo "seed: sample data applied ($(DB))"; \
+	else \
+		echo "seed: missing $(SEED_SQL)"; \
+		exit 1; \
 	fi
 
 web: db $(EXE)
