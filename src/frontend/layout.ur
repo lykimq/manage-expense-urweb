@@ -7,13 +7,15 @@ fun wrap ttl content =
         <link rel="stylesheet" type="text/css" href="/base.css"/>
         <link rel="stylesheet" type="text/css" href="/dashboard.css"/>
         <link rel="stylesheet" type="text/css" href="/expense.css"/>
+        <link rel="stylesheet" type="text/css" href="/expense-detail.css"/>
       </head>
 
       <body>
         <nav>
           <a href="/Main/home">Home</a>
           <a href="/Main/create">Create Expense</a>
-          <a href="/Main/dashboard">Dashboard</a>
+          <a href="/Main/detail">Expense Detail</a>
+          <a href="/Main/dashboard">Dashboard</a>          
         </nav>
 
         <main>

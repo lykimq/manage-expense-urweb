@@ -9,7 +9,9 @@ fun panel title rows =
             <tr>
               <th>ID</th>
               <th>Title</th>
+              <th>Date</th>
               <th>Amount</th>
+              <th>Category</th>
               <th>State</th>
             </tr>
           </thead>
@@ -20,12 +22,14 @@ fun panel title rows =
       </article>
     </xml>
 
-fun row id title amount state =
+fun row id title date amount category state =
     <xml>
       <tr>
         <td>{[show id]}</td>
         <td>{[title]}</td>
+        <td>{[date]}</td>
         <td>{[show amount]}</td>
+        <td>{[category]}</td>
         <td>{[state]}</td>
       </tr>
     </xml>
@@ -39,18 +43,18 @@ fun content () =
 
       {panel "My Expenses"
          <xml>
-           {row 1 "Lunch with client" 42.50 "Draft"}
-           {row 2 "Train tickets" 100.00 "Submitted"}
+           {row 1 "Lunch with client" "2026-05-27" 42.50 "Travel" "Draft"}
+           {row 2 "Train tickets" "2026-05-26" 100.00 "Travel" "Submitted"}
          </xml>}
 
       {panel "Pending Approvals"
          <xml>
-           {row 3 "Office supplies" 120.00 "Submitted"}
+           {row 3 "Office supplies" "2026-05-25" 120.00 "Office" "Submitted"}
          </xml>}
 
       {panel "Pending Payments"
          <xml>
-           {row 4 "Laptop" 1200.00 "Approved"}
+           {row 4 "Laptop" "2026-05-20" 1200.00 "Equipment" "Approved"}
          </xml>}
     </xml>
 

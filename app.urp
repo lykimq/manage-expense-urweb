@@ -5,11 +5,14 @@ sql schema/schema.sql
 file /base.css src/static/base.css
 file /dashboard.css src/static/dashboard.css
 file /expense.css src/static/expense.css
+file /expense-detail.css src/static/expense_detail.css
 allow url /base.css
 allow url /dashboard.css
 allow url /expense.css
+allow url /expense-detail.css
 allow url /Main/home
 allow url /Main/create
+allow url /Main/detail
 allow url /Main/dashboard
 
 # Module load order (top to bottom)
@@ -18,5 +21,6 @@ src/expense
 src/frontend/layout
 src/frontend/dashboard
 src/frontend/create_expense
+src/frontend/expense_detail
 src/frontend/home
 src/main

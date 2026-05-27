@@ -37,7 +37,7 @@ main>article>p {
 main>article>table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   border: 1px solid var(--color-border);
 }
 
@@ -57,16 +57,19 @@ main>article>table th {
   color: #374151;
 }
 
+main>article>table th:nth-child(1),
 main>article>table td:nth-child(1) {
   width: 70px;
 }
 
-main>article>table td:nth-child(3) {
+main>article>table th:nth-child(4),
+main>article>table td:nth-child(4) {
   width: 110px;
   font-weight: 600;
 }
 
-main>article>table td:nth-child(4) {
+main>article>table th:nth-child(6),
+main>article>table td:nth-child(6) {
   width: 120px;
   color: var(--color-primary);
   font-weight: 600;
