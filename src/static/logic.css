@@ -8,6 +8,10 @@ main > article > header > p {
   color: var(--color-muted);
 }
 
+main > article > header > p > b {
+  color: #b91c1c;
+}
+
 main > article > header > ul {
   margin: 10px 0 0;
   padding-left: 20px;

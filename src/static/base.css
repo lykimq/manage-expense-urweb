@@ -29,6 +29,9 @@ body {
 nav {
   background: var(--color-nav);
   padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 nav a {
@@ -40,6 +43,10 @@ nav a {
 
 nav a:hover {
   text-decoration: underline;
+}
+
+nav > span:last-child a {
+  margin-right: 0;
 }
 
 main {

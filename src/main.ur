@@ -1,5 +1,9 @@
 fun login () = Login.page ()
 
+fun logout () =
+    Session.logout ();
+    redirect (bless "/Main/login")
+
 fun home () = Home.page ()
 
 fun create () = Create_expense.page ()

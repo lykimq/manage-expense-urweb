@@ -1,4 +1,5 @@
 val login : unit -> transaction page
+val logout : unit -> transaction page
 val home : unit -> transaction page
 val create : unit -> transaction page
 val dashboard : unit -> transaction page

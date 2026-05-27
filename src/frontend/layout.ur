@@ -1,7 +1,7 @@
 (* Shared page: head, CSS, nav, and content area *)
 
-fun wrap ttl content =
-    return <xml>
+fun headContent ttl =
+    <xml>
       <head>
         <title>{[ttl]}</title>
         <link rel="stylesheet" type="text/css" href="/base.css"/>
@@ -11,15 +11,43 @@ fun wrap ttl content =
         <link rel="stylesheet" type="text/css" href="/expense-detail.css"/>
         <link rel="stylesheet" type="text/css" href="/approval-queue.css"/>
       </head>
+    </xml>
+
+fun setNoCacheHeaders () =
+    setHeader (blessResponseHeader "Cache-Control") "no-store, no-cache, must-revalidate, max-age=0";
+    setHeader (blessResponseHeader "Pragma") "no-cache";
+    setHeader (blessResponseHeader "Expires") "0"
+
+fun wrapNoNav ttl content =
+    setNoCacheHeaders ();
+    return <xml>
+      {headContent ttl}
+      <body>
+        <main>
+          {content}
+        </main>
+      </body>
+    </xml>
+
+fun wrap ttl content =
+    currentUserOpt <- Session.currentUser ();
+    setNoCacheHeaders ();
+    return <xml>
+      {headContent ttl}
 
       <body>
         <nav>
-          <a href="/Main/login">Login</a>
-          <a href="/Main/home">Home</a>
-          <a href="/Main/create">Create Expense</a>
-          <a href="/Main/detail">Expense Detail</a>
-          <a href="/Main/queue">Approval Queue</a>
-          <a href="/Main/dashboard">Dashboard</a>          
+          {case currentUserOpt of
+               Some _ =>
+               <xml>
+                 <span></span>
+                 <span><a href="/Main/logout">Logout</a></span>
+               </xml>
+             | None =>
+               <xml>
+                 <span><a href="/Main/login">Login</a></span>
+                 <span></span>
+               </xml>}
         </nav>
 
         <main>

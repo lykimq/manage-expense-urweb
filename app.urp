@@ -1,6 +1,7 @@
 # App and database configuration
 database dbname=expense_db
 sql schema/schema.sql
+sigfile app.sig
 # Static assets and allowed URLs
 file /base.css src/static/base.css
 file /dashboard.css src/static/dashboard.css
@@ -15,16 +16,21 @@ allow url /logic.css
 allow url /expense-detail.css
 allow url /approval-queue.css
 allow url /Main/login
+allow url /Main/logout
 allow url /Main/home
 allow url /Main/create
 allow url /Main/detail
 allow url /Main/queue
 allow url /Main/dashboard
+allow responseHeader Cache-Control
+allow responseHeader Pragma
+allow responseHeader Expires
 
 # Module load order (top to bottom)
 schema/tables
 src/workflow/state
 src/workflow/transition
+src/auth/session
 src/expense
 src/frontend/layout
 src/frontend/login

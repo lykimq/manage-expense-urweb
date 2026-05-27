@@ -15,6 +15,8 @@ SQL_TABLE  := uw_tables_expenses
 
 APP_SRCS   := $(wildcard src/*.ur) \
               $(wildcard src/*.urs) \
+              $(wildcard src/auth/*.ur) \
+              $(wildcard src/auth/*.urs) \
               $(wildcard src/workflow/*.ur) \
               $(wildcard src/workflow/*.urs) \
               $(wildcard src/frontend/*.ur) \
