@@ -20,6 +20,7 @@ allow url /Main/dashboard
 
 # Module load order (top to bottom)
 schema/tables
+src/workflow/state
 src/expense
 src/frontend/layout
 src/frontend/dashboard
