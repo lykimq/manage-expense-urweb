@@ -1,0 +1,72 @@
+/* Create expense form styles */
+
+main>article>form p {
+  margin: 0 0 var(--space-md);
+}
+
+main>article>form p:last-child {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0;
+}
+
+main>article>form label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+main>article>form table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-md);
+}
+
+main>article>form th {
+  width: 180px;
+  text-align: left;
+  vertical-align: top;
+  padding: 10px 12px 10px 0;
+}
+
+main>article>form td {
+  padding: 10px 0;
+}
+
+main>article>form input[type="text"],
+main>article>form textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--color-text);
+  background: #fff;
+}
+
+main>article>form textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+main>article>form input[type="radio"] {
+  margin-right: 6px;
+}
+
+main>article>form input[type="submit"] {
+  display: inline-block;
+  min-width: 140px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+main>article>form input[type="submit"]:hover {
+  background: var(--color-primary-dark);
+}

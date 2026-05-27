@@ -7,7 +7,3 @@ Planned contents:
 - role-based action runners
 - invariant assertion helpers
 - data integrity check helpers
-
-For now, the main testing guidance is in:
-- `docs/tests-plan.md`
-- `docs/steps.md` (Phase E)

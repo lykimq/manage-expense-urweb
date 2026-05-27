@@ -7,6 +7,8 @@
   --color-text: #1f2937;
   --color-muted: #4b5563;
   --color-nav: #111827;
+  --color-primary: #1d4ed8;
+  --color-primary-dark: #1e40af;
   --radius: 12px;
   --space-sm: 8px;
   --space-md: 16px;
@@ -59,6 +61,7 @@ main > section {
   border-radius: var(--radius);
   padding: 36px var(--space-lg);
   text-align: center;
+  margin-bottom: var(--space-lg);
 }
 
 main > section p {
@@ -66,4 +69,21 @@ main > section p {
   margin: 12px auto 0;
   line-height: 1.6;
   color: var(--color-muted);
+}
+
+main > section + header {
+  margin-top: var(--space-lg);
+}
+
+main > section a,
+main > header a {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+main > section a:hover,
+main > header a:hover {
+  text-decoration: underline;
 }

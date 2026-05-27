@@ -4,15 +4,19 @@ sql schema/schema.sql
 # Static assets and allowed URLs
 file /base.css src/static/base.css
 file /dashboard.css src/static/dashboard.css
+file /expense.css src/static/expense.css
 allow url /base.css
 allow url /dashboard.css
+allow url /expense.css
 allow url /Main/home
+allow url /Main/create
 allow url /Main/dashboard
 
 # Module load order (top to bottom)
 schema/tables
 src/expense
 src/frontend/layout
-src/frontend/home
 src/frontend/dashboard
+src/frontend/create_expense
+src/frontend/home
 src/main

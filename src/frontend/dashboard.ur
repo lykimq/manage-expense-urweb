@@ -30,27 +30,29 @@ fun row id title amount state =
       </tr>
     </xml>
 
+fun content () =
+    <xml>
+      <header>
+        <h1>Dashboard</h1>
+        <p>Overview of all expenses</p>
+      </header>
+
+      {panel "My Expenses"
+         <xml>
+           {row 1 "Lunch with client" 42.50 "Draft"}
+           {row 2 "Train tickets" 100.00 "Submitted"}
+         </xml>}
+
+      {panel "Pending Approvals"
+         <xml>
+           {row 3 "Office supplies" 120.00 "Submitted"}
+         </xml>}
+
+      {panel "Pending Payments"
+         <xml>
+           {row 4 "Laptop" 1200.00 "Approved"}
+         </xml>}
+    </xml>
+
 fun page () =
-    Layout.wrap "Dashboard"
-      <xml>
-        <header>
-          <h1>Dashboard</h1>
-          <p>Overview of all expenses</p>
-        </header>
-
-        {panel "My Expenses"
-           <xml>
-             {row 1 "Lunch with client" 42.50 "Draft"}
-             {row 2 "Train tickets" 100.00 "Submitted"}
-           </xml>}
-
-        {panel "Pending Approvals"
-           <xml>
-             {row 3 "Office supplies" 120.00 "Submitted"}
-           </xml>}
-
-        {panel "Pending Payments"
-           <xml>
-             {row 4 "Laptop" 1200.00 "Approved"}
-           </xml>}
-      </xml>
+    Layout.wrap "Dashboard" (content ())
