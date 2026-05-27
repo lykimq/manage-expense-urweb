@@ -1,8 +1,3 @@
-fun canSubmit st =
-    case st of
-        State.Draft => True
-      | _ => False
-
 fun canApprove st =
     case st of
         State.Submitted => True

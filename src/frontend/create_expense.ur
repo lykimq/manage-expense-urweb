@@ -4,9 +4,6 @@ fun hasRequiredFields r =
     r.Title <> ""
     && r.Amount <> ""
     && r.Category <> ""
-    && (case r.Action of
-            None => False
-          | Some _ => True)
 
 fun missingFieldsPage () =
     Layout.wrap "Create Expense"
@@ -17,7 +14,7 @@ fun missingFieldsPage () =
         </header>
         <article>
           <p>
-            Required fields are Title, Amount, Category, and Action.
+            Required fields are Title, Amount, and Category.
           </p>
           <p>
             <a href="/Main/home">Back to Home</a>
@@ -31,10 +28,16 @@ fun formAction r =
     in
         userId <- Session.requireUser ();
         Policy.requireRole "Employee" userId;
-        if hasRequiredFields r then
-            redirect (bless "/Main/home")
-        else
+        if not (hasRequiredFields r) then
             missingFieldsPage ()
+        else
+            expenseId <- Expense_service.create userId
+              {Title = r.Title,
+               Amount = r.Amount,
+               Category = r.Category,
+               Description = r.Description};
+            Log.info "create_expense" ("created expense_id=" ^ show expenseId);
+            redirect (bless "/Main/home")
     end
 
 fun content () =
@@ -46,7 +49,7 @@ fun content () =
 
       <article>
         <h2>Expense Details</h2>
-        <p>Fill in fields below, choose action, and continue</p>
+        <p>Fill in the fields below and submit for approval.</p>
         <form>
           <table>
             <tr>
@@ -67,14 +70,7 @@ fun content () =
             </tr>
           </table>
           <p>
-            <label>Action</label>
-            <radio{#Action}>
-              <radioOption value="draft"/> Save Draft
-              <radioOption value="submit"/> Submit for Approval
-            </radio>
-          </p>
-          <p>
-            <submit value="Continue" action={formAction}/>
+            <submit value="Submit for Approval" action={formAction}/>
           </p>
         </form>
       </article>

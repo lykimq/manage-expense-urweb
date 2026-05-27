@@ -29,6 +29,8 @@ APP_SRCS := $(wildcard src/*.ur) \
             $(wildcard src/auth/*.urs) \
             $(wildcard src/db/*.ur) \
             $(wildcard src/db/*.urs) \
+            $(wildcard src/service/*.ur) \
+            $(wildcard src/service/*.urs) \
             $(wildcard src/workflow/*.ur) \
             $(wildcard src/workflow/*.urs) \
             $(wildcard src/frontend/*.ur) \

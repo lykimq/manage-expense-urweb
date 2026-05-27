@@ -1,4 +1,4 @@
-(** Create expense form (placeholder; no DB writes yet). *)
+(** Create expense form; POST calls Expense_service.create. *)
 
 (* Form markup only. Role gate on GET is in main.ur (Employee). *)
 val content : unit -> xbody

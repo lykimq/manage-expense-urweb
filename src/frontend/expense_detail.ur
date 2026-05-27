@@ -60,17 +60,17 @@ fun content expenseId =
           <tbody>
             <tr>
               <td>2026-05-27 09:10</td>
-              <td>Draft</td>
-              <td>Draft</td>
-              <td>Initial creation</td>
+              <td></td>
+              <td>Submitted</td>
+              <td>Submitted for approval</td>
               <td>Employee Demo</td>
             </tr>
             <tr>
-              <td>2026-05-27 09:22</td>
-              <td>Draft</td>
+              <td>2026-05-21 09:05</td>
               <td>Submitted</td>
-              <td>Submitted for manager review</td>
-              <td>Employee Demo</td>
+              <td>Approved</td>
+              <td>Approved by manager</td>
+              <td>Manager Demo</td>
             </tr>
           </tbody>
         </table>

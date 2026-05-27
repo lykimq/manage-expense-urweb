@@ -37,11 +37,13 @@ schema/tables
 src/workflow/state
 src/workflow/transition
 src/util/log
+src/util/amount
 src/auth/session
 src/auth/policy
 src/db/user_db
 src/db/expense_db
 src/db/audit_db
+src/service/expense_service
 src/expense
 src/frontend/layout
 src/frontend/error_page

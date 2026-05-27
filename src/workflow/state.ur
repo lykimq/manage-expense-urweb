@@ -1,17 +1,15 @@
-datatype expense_state = Draft | Submitted | Approved | Rejected | Paid
+datatype expense_state = Submitted | Approved | Rejected | Paid
 
 fun toString state =
     case state of
-        Draft => "Draft"
-      | Submitted => "Submitted"
+        Submitted => "Submitted"
       | Approved => "Approved"
       | Rejected => "Rejected"
       | Paid => "Paid"
 
 fun fromString s =
     case s of
-        "Draft" => Some Draft
-      | "Submitted" => Some Submitted
+        "Submitted" => Some Submitted
       | "Approved" => Some Approved
       | "Rejected" => Some Rejected
       | "Paid" => Some Paid

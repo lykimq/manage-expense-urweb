@@ -43,7 +43,7 @@ fun content () =
 
       {panel "My Expenses"
          <xml>
-           {row 1 "Lunch with client" "2026-05-27" 42.50 "Travel" "Draft"}
+           {row 1 "Lunch with client" "2026-05-27" 42.50 "Travel" "Submitted"}
            {row 2 "Train tickets" "2026-05-26" 100.00 "Travel" "Submitted"}
          </xml>}
 
