@@ -1,30 +1,10 @@
-PROJECT := app
-PORT    := 8081
-DB      := expense_db
-URWEB   ?= urweb
-PSQL    ?= psql
-CREATEDB ?= createdb
+include config.mk
 
-URP        := $(PROJECT).urp
-EXE        := $(PROJECT).exe
-SQL        := schema/schema.sql
-EXTRA_SQL  := schema/extra.sql
-SEED_SQL   := schema/seed.sql
-URL        := http://localhost:$(PORT)/Main/login
-SQL_TABLE  := uw_tables_expenses
+URP := $(PROJECT).urp
+EXE := $(PROJECT).exe
+URL := http://localhost:$(PORT)/Main/login
 
-APP_SRCS   := $(wildcard src/*.ur) \
-              $(wildcard src/*.urs) \
-              $(wildcard src/auth/*.ur) \
-              $(wildcard src/auth/*.urs) \
-              $(wildcard src/workflow/*.ur) \
-              $(wildcard src/workflow/*.urs) \
-              $(wildcard src/frontend/*.ur) \
-              $(wildcard src/frontend/*.urs) \
-              $(wildcard schema/*.ur) \
-              $(wildcard schema/*.urs)
-
-.PHONY: all help web test db seed check-db clean
+.PHONY: all help web test db seed check-db clean-session clean
 
 all: help
 
@@ -32,9 +12,10 @@ help:
 	@echo "Targets:"
 	@echo "  make db       Setup database (schema + constraints + seed)"
 	@echo "  make web      Build and run dev server (auto rebuild app only)"
-	@echo "  make seed     Re-apply sample data (requires db)"
-	@echo "  make test     Build, run server briefly, and smoke test"
-	@echo "  make clean    Remove app.exe and generated SQL"
+	@echo "  make seed         Re-apply sample data (requires db)"
+	@echo "  make test         Build, run server briefly, and smoke test"
+	@echo "  make clean-session  Drop the session signing key ($(SIG))"
+	@echo "  make clean        Remove app.exe, generated SQL, and $(SIG)"
 
 $(EXE): $(URP) $(APP_SRCS)
 	$(URWEB) $(PROJECT)
@@ -81,6 +62,8 @@ web: check-db $(EXE)
 		echo "inotifywait not found. Install inotify-tools to use auto rebuild in make web."; \
 		exit 1; \
 	fi; \
+	rm -f $(SIG); \
+	echo "web: rotated $(SIG); previous browser sessions are now invalid."; \
 	printf '\n  Open in browser: '; \
 	printf '\033]8;;%s\033\\%s\033]8;;\033\\\n' "$$url" "$$url"; \
 	printf '  (or %s)\n\n' "$$url"; \
@@ -113,5 +96,9 @@ test: check-db $(EXE)
 	wait $$pid 2>/dev/null || true; \
 	exit $$rc
 
+clean-session:
+	rm -f $(SIG)
+	@echo "clean-session: removed $(SIG); existing browser sessions are now invalid."
+
 clean:
-	rm -f $(EXE) $(SQL)
+	rm -f $(EXE) $(SQL) $(SIG)

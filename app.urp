@@ -9,12 +9,14 @@ file /expense.css src/static/expense.css
 file /logic.css src/static/logic.css
 file /expense-detail.css src/static/expense_detail.css
 file /approval-queue.css src/static/approval_queue.css
+file /bfcache.js src/static/bfcache.js
 allow url /base.css
 allow url /dashboard.css
 allow url /expense.css
 allow url /logic.css
 allow url /expense-detail.css
 allow url /approval-queue.css
+allow url /bfcache.js
 allow url /Main/login
 allow url /Main/logout
 allow url /Main/home
@@ -25,11 +27,15 @@ allow url /Main/dashboard
 allow responseHeader Cache-Control
 allow responseHeader Pragma
 allow responseHeader Expires
+# Pure-JS helper that reloads pages restored from the back/forward cache
+# so server-side session guards always run.
+script /bfcache.js
 
 # Module load order (top to bottom)
 schema/tables
 src/workflow/state
 src/workflow/transition
+src/util/log
 src/auth/session
 src/expense
 src/frontend/layout

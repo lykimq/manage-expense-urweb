@@ -1,13 +1,4 @@
-open Tables
-
-(* Prevent caching so browser Back does not reopen stale login page after sign-in. *)
-fun setNoCacheHeaders () =
-    setHeader (blessResponseHeader "Cache-Control") "no-store, no-cache, must-revalidate, max-age=0";
-    setHeader (blessResponseHeader "Pragma") "no-cache";
-    setHeader (blessResponseHeader "Expires") "0"
-
-fun loginPage errorMessageOpt =
-    setNoCacheHeaders ();
+fun renderLogin errorMessageOpt =
     Layout.wrapNoNav "Login"
       <xml>
         <section>
@@ -45,21 +36,14 @@ fun loginPage errorMessageOpt =
       </xml>
 
 and signin r =
-    currentUserOpt <- Session.currentUser ();
-    case currentUserOpt of
-        Some _ => redirect (bless "/Main/home")
-      | None =>
-        (matchedUserOpt <- oneOrNoRows (SELECT users.Id
-                                        FROM users
-                                        WHERE users.Email = {[r.Email]});
-         case matchedUserOpt of
-             Some matchedUser =>
-             (Session.login matchedUser.Users.Id;
-              redirect (bless "/Main/home"))
-           | None => loginPage (Some ("Email '" ^ r.Email ^ "' was not found. Please try again.")))
+    Session.requireGuest ();
+    loginSucceeded <- Session.loginByEmail r.Email;
+    if loginSucceeded then
+        redirect (bless "/Main/home")
+    else
+        redirect (bless "/Main/login")
 
 fun page () =
-    currentUserOpt <- Session.currentUser ();
-    case currentUserOpt of
-        Some _ => redirect (bless "/Main/home")
-      | None => loginPage None
+    Session.requireGuest ();
+    errorMessageOpt <- Session.consumeLoginError ();
+    renderLogin errorMessageOpt

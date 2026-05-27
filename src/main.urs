@@ -1,3 +1,5 @@
+(** HTTP page entry points (see allow url in app.urp). *)
+
 val login : unit -> transaction page
 val logout : unit -> transaction page
 val home : unit -> transaction page

@@ -1,4 +1,4 @@
-(* Shared page: head, CSS, nav, and content area *)
+(* Page shell: head, CSS, main content, optional nav. *)
 
 fun headContent ttl =
     <xml>
@@ -13,43 +13,28 @@ fun headContent ttl =
       </head>
     </xml>
 
-fun setNoCacheHeaders () =
-    setHeader (blessResponseHeader "Cache-Control") "no-store, no-cache, must-revalidate, max-age=0";
-    setHeader (blessResponseHeader "Pragma") "no-cache";
-    setHeader (blessResponseHeader "Expires") "0"
-
+(* Empty onload marks the page client-side so app.urp script tags (e.g. bfcache.js) load. *)
 fun wrapNoNav ttl content =
-    setNoCacheHeaders ();
+    Session.setNoCacheHeaders ();
     return <xml>
       {headContent ttl}
-      <body>
+      <body onload={return ()}>
         <main>
           {content}
         </main>
       </body>
     </xml>
 
+(* Logged-in shell with logout. *)
 fun wrap ttl content =
-    currentUserOpt <- Session.currentUser ();
-    setNoCacheHeaders ();
+    Session.setNoCacheHeaders ();
     return <xml>
       {headContent ttl}
-
-      <body>
+      <body onload={return ()}>
         <nav>
-          {case currentUserOpt of
-               Some _ =>
-               <xml>
-                 <span></span>
-                 <span><a href="/Main/logout">Logout</a></span>
-               </xml>
-             | None =>
-               <xml>
-                 <span><a href="/Main/login">Login</a></span>
-                 <span></span>
-               </xml>}
+          <span></span>
+          <span><a href="/Main/logout">Logout</a></span>
         </nav>
-
         <main>
           {content}
         </main>

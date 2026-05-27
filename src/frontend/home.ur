@@ -1,32 +1,14 @@
-open Tables
+fun renderUserCard info =
+    <xml>
+      <article>
+        <h2>Welcome, {[info.FullName]}</h2>
+        <p>You are logged in successfully.</p>
+        <p><b>Role:</b> {[info.Role]}</p>
+        <p><b>Email:</b> {[info.Email]}</p>
+      </article>
+    </xml>
 
-fun userSummary userId =
-    matchedUserOpt <- oneOrNoRows (SELECT users.FullName, users.Role, users.Email
-                                   FROM users
-                                   WHERE users.Id = {[userId]});
-    return (case matchedUserOpt of
-               Some matchedUser =>
-               <xml>
-                 <article>
-                   <h2>Welcome, {[matchedUser.Users.FullName]}</h2>
-                   <p>You are logged in successfully.</p>
-                   <p><b>Role:</b> {[matchedUser.Users.Role]}</p>
-                   <p><b>Email:</b> {[matchedUser.Users.Email]}</p>
-                 </article>
-               </xml>
-             | None =>
-               <xml>
-                 <article>
-                   <h2>Logged In User</h2>
-                   <p>User details were not found. Please log in again.</p>
-                 </article>
-               </xml>)
-
-fun page () =
-    currentUserOpt <- Session.currentUser ();
-    userInfo <- (case currentUserOpt of
-                    Some userId => userSummary userId
-                  | None => return <xml></xml>);
+fun page info =
     Layout.wrap "Expense Management System"
       <xml>
         <section>
@@ -37,7 +19,7 @@ fun page () =
           </p>
         </section>
 
-        {userInfo}
+        {renderUserCard info}
         {Create_expense.content ()}
         {Dashboard.content ()}
       </xml>
