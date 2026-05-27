@@ -14,7 +14,8 @@ fun home () =
 
 fun create () =
     Log.info "main" "GET /Main/create";
-    _ <- Session.requireUser ();
+    userId <- Session.requireUser ();
+    Policy.requireRole "Employee" userId;
     Create_expense.page ()
 
 fun dashboard () =
@@ -29,5 +30,6 @@ fun detail () =
 
 fun queue () =
     Log.info "main" "GET /Main/queue";
-    _ <- Session.requireUser ();
+    userId <- Session.requireUser ();
+    Policy.requireRole "Manager" userId;
     Approval_queue.page ()

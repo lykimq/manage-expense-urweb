@@ -29,6 +29,8 @@ fun formAction r =
     let
         val _ = r.Description
     in
+        userId <- Session.requireUser ();
+        Policy.requireRole "Employee" userId;
         if hasRequiredFields r then
             redirect (bless "/Main/home")
         else

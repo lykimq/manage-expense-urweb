@@ -2,6 +2,7 @@
 database dbname=expense_db
 sql schema/schema.sql
 sigfile app.sig
+onError Error_page.err
 # Static assets and allowed URLs
 file /base.css src/static/base.css
 file /dashboard.css src/static/dashboard.css
@@ -37,8 +38,10 @@ src/workflow/state
 src/workflow/transition
 src/util/log
 src/auth/session
+src/auth/policy
 src/expense
 src/frontend/layout
+src/frontend/error_page
 src/frontend/login
 src/frontend/dashboard
 src/frontend/create_expense
