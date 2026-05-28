@@ -1,5 +1,6 @@
 # CSRF signing key (created by Ur/Web when sigfile is set)
 app.sig
+test.sig
 
 # Build output
 *.exe

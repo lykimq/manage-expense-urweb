@@ -2,6 +2,8 @@ fun main () : transaction page =
     expenseServiceResults <- Expense_service_tests.runAll ();
     dashboardServiceResults <- Dashboard_service_tests.runAll ();
     detailServiceResults <- Detail_service_tests.runAll ();
+    policyResults <- Policy_tests.runAll ();
+    sessionResults <- Session_tests.runAll ();
     let
         val integrationResults =
             List.append expenseServiceResults
@@ -10,18 +12,22 @@ fun main () : transaction page =
     let
         val stateResults = State_test.results
         val transitionResults = Transition_test.results
-        val policyResults = Policy_tests.results
-        val sessionResults = Session_tests.results
+        val amountResults = Expense_service_amount_tests.results
+        val createValidationResults = Create_expense_validation_tests.results
 
         val passedCount =
             Test_harness.countPassed stateResults
             + Test_harness.countPassed transitionResults
+            + Test_harness.countPassed amountResults
+            + Test_harness.countPassed createValidationResults
             + Test_harness.countPassed policyResults
             + Test_harness.countPassed sessionResults
             + Test_harness.countPassed integrationResults
         val totalCount =
             Test_harness.countTotal stateResults
             + Test_harness.countTotal transitionResults
+            + Test_harness.countTotal amountResults
+            + Test_harness.countTotal createValidationResults
             + Test_harness.countTotal policyResults
             + Test_harness.countTotal sessionResults
             + Test_harness.countTotal integrationResults
@@ -29,6 +35,8 @@ fun main () : transaction page =
         val allPassed =
             Test_harness.allPassed stateResults
             && Test_harness.allPassed transitionResults
+            && Test_harness.allPassed amountResults
+            && Test_harness.allPassed createValidationResults
             && Test_harness.allPassed policyResults
             && Test_harness.allPassed sessionResults
             && Test_harness.allPassed integrationResults
@@ -36,6 +44,8 @@ fun main () : transaction page =
         val reportText =
             Test_harness.formatGroup State_test.groupName stateResults
             ^ Test_harness.formatGroup Transition_test.groupName transitionResults
+            ^ Test_harness.formatGroup Expense_service_amount_tests.groupName amountResults
+            ^ Test_harness.formatGroup Create_expense_validation_tests.groupName createValidationResults
             ^ Test_harness.formatGroup Policy_tests.groupName policyResults
             ^ Test_harness.formatGroup Session_tests.groupName sessionResults
             ^ Test_harness.formatGroup Expense_service_tests.groupName expenseServiceResults

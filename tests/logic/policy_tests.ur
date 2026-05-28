@@ -1,48 +1,20 @@
 val groupName = "policy"
 
-fun roleMatches expectedRole actualRole =
-    expectedRole = actualRole
-
-fun canActOnExpense ids =
-    ids.ActorId <> ids.OwnerId
-
-val roleMatchesExact =
-    Test_harness.mkResult "matching role names are accepted"
-        (roleMatches "Manager" "Manager")
-
-val roleMismatchDenied =
-    Test_harness.mkResult "different role names are rejected"
-        (not (roleMatches "Manager" "Employee"))
-
-val roleCaseSensitive =
-    Test_harness.mkResult "role matching is case sensitive"
-        (not (roleMatches "manager" "Manager"))
-
-val roleEmptyOnlyMatchesEmpty =
-    Test_harness.mkResult "empty role only matches empty role"
-        (roleMatches "" ""
-         && not (roleMatches "" "Finance")
-         && not (roleMatches "Finance" ""))
-
-val notOwnerAllowed =
-    Test_harness.mkResult "actor can act when actor and owner are different"
-        (canActOnExpense {ActorId = 2, OwnerId = 1})
-
-val ownerDenied =
-    Test_harness.mkResult "actor cannot act on own expense"
-        (not (canActOnExpense {ActorId = 7, OwnerId = 7}))
-
-val canActSymmetricWhenDifferent =
-    Test_harness.mkResult "non-owner check is symmetric for distinct ids"
-        (canActOnExpense {ActorId = 3, OwnerId = 9}
-         && canActOnExpense {ActorId = 9, OwnerId = 3})
-
-val results : list Test_harness.test_result =
-    roleMatchesExact ::
-    roleMismatchDenied ::
-    roleCaseSensitive ::
-    roleEmptyOnlyMatchesEmpty ::
-    notOwnerAllowed ::
-    ownerDenied ::
-    canActSymmetricWhenDifferent ::
-    []
+fun runAll () : transaction (list Test_harness.test_result) =
+    _ <- Policy.requireRole Roles.Employee 1;
+    _ <- Policy.requireRole Roles.Manager 2;
+    _ <- Policy.requireRole Roles.Finance 3;
+    _ <- Policy.requireNotOwner 2 1;
+    _ <- Policy.requireNotOwner 3 1;
+    return (Test_harness.mkResult "requireRole accepts seeded Employee user" True ::
+            Test_harness.mkResult "requireRole accepts seeded Manager user" True ::
+            Test_harness.mkResult "requireRole accepts seeded Finance user" True ::
+            Test_harness.mkResult "roleMatches rejects Manager expected vs Finance actual"
+              (not (Policy.roleMatches Roles.Manager "Finance")) ::
+            Test_harness.mkResult "roleMatches rejects unknown role string"
+              (not (Policy.roleMatches Roles.Manager "UnknownRole")) ::
+            Test_harness.mkResult "canActOnExpense rejects self ownership"
+              (not (Policy.canActOnExpense 7 7)) ::
+            Test_harness.mkResult "requireNotOwner allows manager on employee expense" True ::
+            Test_harness.mkResult "requireNotOwner allows finance on employee expense" True ::
+            [])

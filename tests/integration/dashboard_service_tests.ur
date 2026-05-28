@@ -2,29 +2,13 @@ open Tables
 
 val groupName = "dashboard_service"
 
-type dashboard_request = {Role : string, UserId : int}
+type dashboard_request = {Role : Roles.role, UserId : int}
 
 fun loadWorkspace req =
     Dashboard_service.loadWorkspace req.Role req.UserId
 
 fun loadQueueWorkspace req =
     Dashboard_service.loadQueueWorkspace req.Role req.UserId
-
-fun hasExpenseId expenseId expenses =
-    case expenses of
-        [] => False
-      | e :: rest =>
-        if e.Id = expenseId then True else hasExpenseId expenseId rest
-
-fun allInState expectedState expenses =
-    case expenses of
-        [] => True
-      | e :: rest =>
-        e.State = expectedState && allInState expectedState rest
-
-fun cleanupExpense expenseId =
-    dml (DELETE FROM audit_log WHERE ExpenseId = {[expenseId]});
-    dml (DELETE FROM expenses WHERE Id = {[expenseId]})
 
 fun runAll () : transaction (list Test_harness.test_result) =
     submittedId <- Expense_service.create 1
@@ -39,31 +23,31 @@ fun runAll () : transaction (list Test_harness.test_result) =
                    Description = "Dashboard test approved"};
     Expense_service.approve 2 approvedId "Approve dashboard test expense";
 
-    employeeWorkspace <- loadWorkspace {Role = "Employee", UserId = 1};
-    managerWorkspace <- loadWorkspace {Role = "Manager", UserId = 2};
-    financeWorkspace <- loadWorkspace {Role = "Finance", UserId = 3};
-    managerQueue <- loadQueueWorkspace {Role = "Manager", UserId = 2};
-    financeQueue <- loadQueueWorkspace {Role = "Finance", UserId = 3};
+    employeeWorkspace <- loadWorkspace {Role = Roles.Employee, UserId = 1};
+    managerWorkspace <- loadWorkspace {Role = Roles.Manager, UserId = 2};
+    financeWorkspace <- loadWorkspace {Role = Roles.Finance, UserId = 3};
+    managerQueue <- loadQueueWorkspace {Role = Roles.Manager, UserId = 2};
+    financeQueue <- loadQueueWorkspace {Role = Roles.Finance, UserId = 3};
 
     let
         val employeeOwnExpensesVisible =
-            hasExpenseId submittedId employeeWorkspace.Expenses
-            && hasExpenseId approvedId employeeWorkspace.Expenses
+            Test_data_utils.hasExpenseId submittedId employeeWorkspace.Expenses
+            && Test_data_utils.hasExpenseId approvedId employeeWorkspace.Expenses
         val managerSeesSubmittedOnly =
-            hasExpenseId submittedId managerWorkspace.Expenses
-            && allInState (show State.Submitted) managerWorkspace.Expenses
+            Test_data_utils.hasExpenseId submittedId managerWorkspace.Expenses
+            && Test_data_utils.allInState (show State.Submitted) managerWorkspace.Expenses
         val financeSeesApprovedOnly =
-            hasExpenseId approvedId financeWorkspace.Expenses
-            && allInState (show State.Approved) financeWorkspace.Expenses
+            Test_data_utils.hasExpenseId approvedId financeWorkspace.Expenses
+            && Test_data_utils.allInState (show State.Approved) financeWorkspace.Expenses
         val managerQueueMatchesRole =
             managerQueue.PanelTitle = "Submitted Expenses"
-            && hasExpenseId submittedId managerQueue.Expenses
+            && Test_data_utils.hasExpenseId submittedId managerQueue.Expenses
         val financeQueueMatchesRole =
             financeQueue.PanelTitle = "Approved Expenses"
-            && hasExpenseId approvedId financeQueue.Expenses
+            && Test_data_utils.hasExpenseId approvedId financeQueue.Expenses
     in
-        cleanupExpense submittedId;
-        cleanupExpense approvedId;
+        Test_data_utils.cleanupExpense submittedId;
+        Test_data_utils.cleanupExpense approvedId;
         return (Test_harness.mkResult "employee workspace returns owner expenses" employeeOwnExpensesVisible ::
                 Test_harness.mkResult "manager workspace returns submitted queue" managerSeesSubmittedOnly ::
                 Test_harness.mkResult "finance workspace returns approved queue" financeSeesApprovedOnly ::

@@ -25,7 +25,6 @@ allow url /Main/create
 allow url /Main/detail
 allow url /Main/detail/*
 allow url /Main/queue
-allow url /Main/dashboard
 allow responseHeader Cache-Control
 allow responseHeader Pragma
 allow responseHeader Expires
@@ -39,6 +38,7 @@ schema/tables
 src/workflow/state
 src/workflow/transition
 src/util/log
+src/auth/roles
 src/auth/session
 src/auth/policy
 src/db/user_db

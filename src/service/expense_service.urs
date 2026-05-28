@@ -9,6 +9,9 @@ val loadExpense : int -> transaction Expense_db.expense
 (* Employee: new expense in Submitted; returns expense Id. *)
 val create : int -> expense_fields -> transaction int
 
+(* Shared amount parser used by create; None means invalid number input. *)
+val parseAmountValue : string -> option float
+
 (* Manager: Submitted -> Approved. *)
 val approve : int -> int -> string -> transaction unit
 

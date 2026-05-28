@@ -250,4 +250,5 @@ That order matches the point of the project: business rules first, UI second.
 - `src/service`: transactional business actions
 - `src/db`: typed database access functions
 - `src/frontend`: pages and form handlers
+- `tests`: logic and integration test suite (runs on dedicated test DB)
 - `schema`: table declarations, extra constraints, seed data

@@ -1,19 +1,5 @@
 open Tables
 
-fun hasCurrentUser currentUserOpt =
-    case currentUserOpt of
-        Some _ => True
-      | None => False
-
-fun shouldRedirectRequireUser currentUserOpt =
-    not (hasCurrentUser currentUserOpt)
-
-fun shouldRedirectRequireGuest currentUserOpt =
-    hasCurrentUser currentUserOpt
-
-fun shouldRedirectRequireUserInfo hasUserInfo =
-    not hasUserInfo
-
 (* Signed-in user id. *)
 cookie user_session : {UserId : int}
 
@@ -61,35 +47,29 @@ fun currentUserInfo () =
 (* Must be logged in; otherwise redirect to login. Returns user id. *)
 fun requireUser () =
     currentUserOpt <- currentUser ();
-    if shouldRedirectRequireUser currentUserOpt then
+    case currentUserOpt of
+        None =>
         (Log.debug "session" "requireUser rejected (no session)";
          redirect (bless "/Main/login"))
-    else
-        case currentUserOpt of
-            Some id => return id
-          | None => error <xml><p><b>Unexpected session state.</b></p></xml>
+      | Some id => return id
 
 (* Like requireUser, but returns name, role, and email from the DB. *)
 fun requireUserInfo () =
     userInfoOpt <- currentUserInfo ();
-    if shouldRedirectRequireUserInfo
-           (case userInfoOpt of
-                Some _ => True
-              | None => False) then
+    case userInfoOpt of
+        None =>
         (Log.debug "session" "requireUserInfo rejected (no session or user row)";
          redirect (bless "/Main/login"))
-    else
-        case userInfoOpt of
-            Some info => return info
-          | None => error <xml><p><b>Unexpected user info state.</b></p></xml>
+      | Some info => return info
 
 (* Login page only; redirect to home if already signed in. *)
 fun requireGuest () =
     currentUserOpt <- currentUser ();
-    if shouldRedirectRequireGuest currentUserOpt then
+    case currentUserOpt of
+        Some _ =>
         (Log.debug "session" "requireGuest redirecting to home";
          redirect (bless "/Main/home"))
-    else
+      | None =>
         return ()
 
 fun loginByEmail email =

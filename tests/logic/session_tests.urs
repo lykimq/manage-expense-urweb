@@ -1,4 +1,4 @@
-(** Tests for pure session guard predicates. *)
+(** Tests for Session module behavior. *)
 
 val groupName : string
-val results : list Test_harness.test_result
+val runAll : unit -> transaction (list Test_harness.test_result)

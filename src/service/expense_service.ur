@@ -34,13 +34,16 @@ fun applyTransition userId expense expenseId newState comment =
         return ()
     end
 
+fun parseAmountValue s =
+    read s : option float
+
 fun parseAmount s =
-    case read s : option float of
+    case parseAmountValue s of
         None => error <xml><p><b>Amount must be a valid number.</b></p></xml>
       | Some amount => return amount
 
 fun create userId fields =
-    Policy.requireRole "Employee" userId;
+    Policy.requireRole Roles.Employee userId;
     amount <- parseAmount fields.Amount;
     expenseId <- Expense_db.create {Title = fields.Title,
                                     Amount = amount,
@@ -57,7 +60,7 @@ fun create userId fields =
     return expenseId
 
 fun approve userId expenseId comment =
-    Policy.requireRole "Manager" userId;
+    Policy.requireRole Roles.Manager userId;
     expense <- loadExpense expenseId;
     Policy.requireNotOwner userId expense.OwnerId;
     state <- expenseState expense;
@@ -65,7 +68,7 @@ fun approve userId expenseId comment =
     applyTransition userId expense expenseId State.Approved comment
 
 fun reject userId expenseId comment =
-    Policy.requireRole "Manager" userId;
+    Policy.requireRole Roles.Manager userId;
     expense <- loadExpense expenseId;
     Policy.requireNotOwner userId expense.OwnerId;
     state <- expenseState expense;
@@ -73,7 +76,7 @@ fun reject userId expenseId comment =
     applyTransition userId expense expenseId State.Rejected comment
 
 fun pay userId expenseId =
-    Policy.requireRole "Finance" userId;
+    Policy.requireRole Roles.Finance userId;
     expense <- loadExpense expenseId;
     state <- expenseState expense;
     requireTransition (Transition.canPay state) state "pay";

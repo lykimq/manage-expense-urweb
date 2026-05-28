@@ -14,7 +14,11 @@ fun queueRow e =
 fun content () =
     userInfo <- Session.requireUserInfo ();
     userId <- Session.requireUser ();
-    workspace <- Dashboard_service.loadQueueWorkspace userInfo.Role userId;
+    role <-
+      (case Roles.fromString userInfo.Role of
+           Some r => return r
+         | None => error <xml><p><b>You are not allowed to view the approval queue.</b></p></xml>);
+    workspace <- Dashboard_service.loadQueueWorkspace role userId;
     return <xml>
       <header>
         <h1>Approval Queue</h1>

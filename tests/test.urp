@@ -1,6 +1,9 @@
 database dbname=expense_test_db
 sql ../schema/schema.sql
+sigfile test.sig
 allow url /Test_main/main
+allow url /Main/login
+allow url /Main/home
 safeGet Test_main/main
 
 $/list
@@ -8,6 +11,8 @@ $/list
 ../src/workflow/state
 ../src/workflow/transition
 ../src/util/log
+../src/auth/roles
+../src/auth/session
 ../src/auth/policy
 ../src/db/expense_db
 ../src/db/audit_db
@@ -15,11 +20,16 @@ $/list
 ../src/service/expense_service
 ../src/service/dashboard_service
 ../src/service/detail_service
+../src/frontend/layout
+../src/frontend/create_expense
 test_harness
 logic/state_test
 logic/transition_test
+logic/expense_service_amount_tests
+logic/create_expense_validation_tests
 logic/policy_tests
 logic/session_tests
+integration/test_data_utils
 integration/expense_service_tests
 integration/dashboard_service_tests
 integration/detail_service_tests

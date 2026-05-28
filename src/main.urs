@@ -12,9 +12,6 @@ val home : unit -> transaction page
 (* Create expense form; Employee only. *)
 val create : unit -> transaction page
 
-(* Dashboard; any logged-in role. *)
-val dashboard : unit -> transaction page
-
 (* Expense detail; any logged-in role. *)
 val detail : int -> transaction page
 

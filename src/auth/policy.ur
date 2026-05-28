@@ -1,15 +1,37 @@
 open Tables
 
-fun roleMatches expectedRole actualRole =
-    expectedRole = actualRole
-
-fun canActOnExpense actorId ownerId =
-    actorId <> ownerId
-
 fun roleForUser userId =
     oneOrNoRows (SELECT users.Role
                  FROM users
                  WHERE users.Id = {[userId]})
+
+fun roleMatches expectedRole actualRoleString =
+    case Roles.fromString actualRoleString of
+        Some actualRole =>
+        (case expectedRole of
+             Roles.Employee =>
+             (case actualRole of
+                  Roles.Employee => True
+                | _ => False)
+           | Roles.Manager =>
+             (case actualRole of
+                  Roles.Manager => True
+                | _ => False)
+           | Roles.Finance =>
+             (case actualRole of
+                  Roles.Finance => True
+                | _ => False))
+      | None => False
+
+fun canActOnExpense actorId ownerId =
+    actorId <> ownerId
+
+fun rejectRole userId actualRole expectedRole =
+    (Log.warn "policy"
+       ("requireRole rejected: id=" ^ show userId
+        ^ " has " ^ show actualRole
+        ^ ", need " ^ show expectedRole);
+     error <xml><p><b>You are not allowed to perform this action.</b></p></xml>)
 
 (* Abort unless the user exists and users.Role equals expectedRole. *)
 fun requireRole expectedRole userId =
@@ -19,14 +41,17 @@ fun requireRole expectedRole userId =
         (Log.warn "policy" ("requireRole rejected (user not found): id=" ^ show userId);
          error <xml><p><b>User not found.</b></p></xml>)
       | Some roleRow =>
-        if roleMatches expectedRole roleRow.Users.Role then
-            return ()
-        else
+        case Roles.fromString roleRow.Users.Role of
+            None =>
             (Log.warn "policy"
                ("requireRole rejected: id=" ^ show userId
-                ^ " has " ^ roleRow.Users.Role
-                ^ ", need " ^ expectedRole);
+                ^ " has unknown role " ^ roleRow.Users.Role);
              error <xml><p><b>You are not allowed to perform this action.</b></p></xml>)
+          | Some actualRole =>
+            if roleMatches expectedRole (Roles.toString actualRole) then
+                return ()
+            else
+                rejectRole userId actualRole expectedRole
 
 (* Abort when actorId is the expense owner (no self-approval). *)
 fun requireNotOwner actorId ownerId =

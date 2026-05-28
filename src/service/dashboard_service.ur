@@ -1,16 +1,14 @@
 fun panelTitle role =
     case role of
-        "Employee" => "My Expenses"
-      | "Manager" => "Awaiting approval"
-      | "Finance" => "Awaiting payment"
-      | _ => "Expenses"
+        Roles.Employee => "My Expenses"
+      | Roles.Manager => "Awaiting approval"
+      | Roles.Finance => "Awaiting payment"
 
 fun loadExpenses role userId =
     case role of
-        "Employee" => Expense_db.getByOwner userId
-      | "Manager" => Expense_db.getByState (show State.Submitted)
-      | "Finance" => Expense_db.getByState (show State.Approved)
-      | _ => return []
+        Roles.Employee => Expense_db.getByOwner userId
+      | Roles.Manager => Expense_db.getByState (show State.Submitted)
+      | Roles.Finance => Expense_db.getByState (show State.Approved)
 
 fun loadWorkspace role userId =
     expenses <- loadExpenses role userId;
@@ -18,16 +16,16 @@ fun loadWorkspace role userId =
 
 fun queuePanelTitle role =
     case role of
-        "Manager" => "Submitted Expenses"
-      | "Finance" => "Approved Expenses"
+        Roles.Manager => "Submitted Expenses"
+      | Roles.Finance => "Approved Expenses"
       | _ => "Approval Queue"
 
 fun loadQueueWorkspace role userId =
     case role of
-        "Manager" =>
+        Roles.Manager =>
         exps <- Expense_db.getByState (show State.Submitted);
         return {PanelTitle = queuePanelTitle role, Expenses = exps}
-      | "Finance" =>
+      | Roles.Finance =>
         exps <- Expense_db.getByState (show State.Approved);
         return {PanelTitle = queuePanelTitle role, Expenses = exps}
       | _ =>

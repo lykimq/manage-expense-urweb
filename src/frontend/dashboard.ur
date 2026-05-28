@@ -47,57 +47,57 @@ fun panel title tableRows =
 
 fun roleActions role =
     case role of
-        "Employee" =>
+        Roles.Employee =>
         <xml>
           <p>
             <a href={bless "/Main/create"}>Submit new expense</a>
           </p>
         </xml>
-      | "Manager" =>
+      | Roles.Manager =>
         <xml>
           <p>
             <a href={bless "/Main/queue"}>Open approval queue</a>
           </p>
         </xml>
-      | "Finance" =>
+      | Roles.Finance =>
         <xml>
           <p>Mark expenses paid from each expense detail page.</p>
         </xml>
-      | _ => <xml><p></p></xml>
 
 fun roleIntro role =
     case role of
-        "Employee" =>
+        Roles.Employee =>
         <xml>
           <p>Submit a new expense, then track status in the table below.</p>
         </xml>
-      | "Manager" =>
+      | Roles.Manager =>
         <xml>
           <p>Review Submitted expenses below or use the approval queue.</p>
         </xml>
-      | "Finance" =>
+      | Roles.Finance =>
         <xml>
           <p>Approved expenses ready for payment are listed below.</p>
         </xml>
-      | _ => <xml><p></p></xml>
 
 fun contentForRole info userId =
-    workspace <- Dashboard_service.loadWorkspace info.Role userId;
-    return
-      <xml>
-        <header>
-          <h1>Your workspace</h1>
-          {roleIntro info.Role}
-          {roleActions info.Role}
-        </header>
-        {panel workspace.PanelTitle (expenseRows workspace.Expenses)}
-      </xml>
-
-fun content () =
-    userInfo <- Session.requireUserInfo ();
-    userId <- Session.requireUser ();
-    contentForRole userInfo userId
-
-fun page () =
-    body <- content ();
-    Layout.wrap "Dashboard" body
+    let
+        val roleOpt = Roles.fromString info.Role
+    in
+        workspace <-
+          (case roleOpt of
+               Some role => Dashboard_service.loadWorkspace role userId
+             | None => return {PanelTitle = "Expenses", Expenses = []});
+        return
+          <xml>
+            <header>
+              <h1>Your workspace</h1>
+              {case roleOpt of
+                   Some role => roleIntro role
+                 | None => <xml><p></p></xml>}
+              {case roleOpt of
+                   Some role => roleActions role
+                 | None => <xml><p></p></xml>}
+            </header>
+            {panel workspace.PanelTitle (expenseRows workspace.Expenses)}
+          </xml>
+    end

@@ -5,7 +5,3 @@ type user_info = {FullName : string, Role : string, Email : string}
 (* Workspace section for home; caller supplies session user id. *)
 val contentForRole :
     user_info -> int -> transaction xbody
-
-(* Standalone /Main/dashboard page. *)
-val content : unit -> transaction xbody
-val page : unit -> transaction page

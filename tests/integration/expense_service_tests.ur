@@ -6,10 +6,6 @@ type create_case_out =
 
 val groupName = "expense_service"
 
-fun cleanupExpense expenseId =
-    dml (DELETE FROM audit_log WHERE ExpenseId = {[expenseId]});
-    dml (DELETE FROM expenses WHERE Id = {[expenseId]})
-
 fun testCreateCase () : transaction create_case_out =
     expenseId <- Expense_service.create 1
                 {Title = "Integration expense",
@@ -64,9 +60,34 @@ fun testPayCase expenseId : transaction (list Test_harness.test_result) =
                 [])
     end
 
+fun testRejectCase () : transaction (list Test_harness.test_result) =
+    rejectedId <- Expense_service.create 1
+                 {Title = "Integration reject expense",
+                  Amount = "8.25",
+                  Category = "Meals",
+                  Description = "Reject integration test flow"};
+    Expense_service.reject 2 rejectedId "Rejected by integration test";
+    rejectedExpenseOpt <- Expense_db.getById rejectedId;
+    rejectedAudit <- Audit_db.getByExpense rejectedId;
+    let
+        val rejectStateOk =
+            case rejectedExpenseOpt of
+                Some e => e.State = show State.Rejected
+              | None => False
+        val rejectAuditOk = List.length rejectedAudit = 2
+    in
+        Test_data_utils.cleanupExpense rejectedId;
+        return (Test_harness.mkResult "reject sets state to Rejected" rejectStateOk ::
+                Test_harness.mkResult "reject appends one audit row" rejectAuditOk ::
+                [])
+    end
+
 fun runAll () : transaction (list Test_harness.test_result) =
     createOut <- testCreateCase ();
     approveResults <- testApproveCase createOut.ExpenseId;
     payResults <- testPayCase createOut.ExpenseId;
-    cleanupExpense createOut.ExpenseId;
-    return (List.append createOut.Results (List.append approveResults payResults))
+    rejectResults <- testRejectCase ();
+    Test_data_utils.cleanupExpense createOut.ExpenseId;
+    return (List.append createOut.Results
+            (List.append approveResults
+             (List.append payResults rejectResults)))

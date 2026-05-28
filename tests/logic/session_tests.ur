@@ -1,66 +1,34 @@
 val groupName = "session"
 
-fun hasCurrentUser currentUserOpt =
-    case currentUserOpt of
-        Some _ => True
-      | None => False
-
-fun shouldRedirectRequireUser currentUserOpt =
-    not (hasCurrentUser currentUserOpt)
-
-fun shouldRedirectRequireGuest currentUserOpt =
-    hasCurrentUser currentUserOpt
-
-fun shouldRedirectRequireUserInfo hasUserInfo =
-    not hasUserInfo
-
-val hasCurrentUserSome =
-    Test_harness.mkResult "hasCurrentUser returns true for Some user"
-        (hasCurrentUser (Some 1))
-
-val hasCurrentUserNone =
-    Test_harness.mkResult "hasCurrentUser returns false for None"
-        (not (hasCurrentUser None))
-
-val requireUserRedirectsWithoutSession =
-    Test_harness.mkResult "requireUser redirects when session is missing"
-        (shouldRedirectRequireUser None)
-
-val requireUserAllowsWithSession =
-    Test_harness.mkResult "requireUser does not redirect when session exists"
-        (not (shouldRedirectRequireUser (Some 42)))
-
-val requireGuestAllowsWithoutSession =
-    Test_harness.mkResult "requireGuest does not redirect when session is missing"
-        (not (shouldRedirectRequireGuest None))
-
-val requireGuestRedirectsWithSession =
-    Test_harness.mkResult "requireGuest redirects when session exists"
-        (shouldRedirectRequireGuest (Some 42))
-
-val requireGuestOpposesRequireUser =
-    Test_harness.mkResult "requireGuest redirect decision is opposite of requireUser"
-        (shouldRedirectRequireGuest None
-            = not (shouldRedirectRequireUser None)
-         && shouldRedirectRequireGuest (Some 3)
-            = not (shouldRedirectRequireUser (Some 3)))
-
-val requireUserInfoRedirectWhenMissing =
-    Test_harness.mkResult "requireUserInfo redirects when user info is missing"
-        (shouldRedirectRequireUserInfo False)
-
-val requireUserInfoAllowsWhenPresent =
-    Test_harness.mkResult "requireUserInfo does not redirect when user info exists"
-        (not (shouldRedirectRequireUserInfo True))
-
-val results : list Test_harness.test_result =
-    hasCurrentUserSome ::
-    hasCurrentUserNone ::
-    requireUserRedirectsWithoutSession ::
-    requireUserAllowsWithSession ::
-    requireGuestAllowsWithoutSession ::
-    requireGuestRedirectsWithSession ::
-    requireGuestOpposesRequireUser ::
-    requireUserInfoRedirectWhenMissing ::
-    requireUserInfoAllowsWhenPresent ::
-    []
+fun runAll () : transaction (list Test_harness.test_result) =
+    Session.logout ();
+    currentNone <- Session.currentUser ();
+    _ <- Session.requireGuest ();
+    loginOk <- Session.loginByEmail "quyen_ly@example.com";
+    consumedError <- Session.consumeLoginError ();
+    Session.logout ();
+    currentAfterLogout <- Session.currentUser ();
+    badLoginOk <- Session.loginByEmail "missing_user@example.com";
+    flashAfterConsume <- Session.consumeLoginError ();
+    Session.logout ();
+    return
+      (Test_harness.mkResult "currentUser is None after logout"
+           (case currentNone of
+                None => True
+              | Some _ => False) ::
+       Test_harness.mkResult "requireGuest allows access without session" True ::
+       Test_harness.mkResult "loginByEmail succeeds for seeded user" loginOk ::
+       Test_harness.mkResult "login error flash is empty after successful login"
+           (case consumedError of
+                None => True
+              | Some _ => False) ::
+       Test_harness.mkResult "logout clears session cookie"
+           (case currentAfterLogout of
+                None => True
+              | Some _ => False) ::
+       Test_harness.mkResult "loginByEmail fails for unknown email" (not badLoginOk) ::
+       Test_harness.mkResult "consumeLoginError clears flash after one read"
+           (case flashAfterConsume of
+                None => True
+              | Some _ => False) ::
+       [])

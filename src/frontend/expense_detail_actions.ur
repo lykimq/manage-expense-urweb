@@ -53,11 +53,17 @@ fun actionsSection userId userRole expense =
     case State.fromString expense.State of
         None => return <xml><p>Actions are not available for an invalid state.</p></xml>
       | Some state =>
-        if userRole = "Manager"
-           && userId <> expense.OwnerId
-           && Transition.canApprove state then
-            return (managerForms expense.Id)
-        else if userRole = "Finance" && Transition.canPay state then
-            return (financeForm expense.Id)
-        else
+        case Roles.fromString userRole of
+            Some Roles.Manager =>
+            if userId <> expense.OwnerId
+               && Transition.canApprove state then
+                return (managerForms expense.Id)
+            else
+                return <xml><p>No actions available for your role and this expense state.</p></xml>
+          | Some Roles.Finance =>
+            if Transition.canPay state then
+                return (financeForm expense.Id)
+            else
+                return <xml><p>No actions available for your role and this expense state.</p></xml>
+          | _ =>
             return <xml><p>No actions available for your role and this expense state.</p></xml>

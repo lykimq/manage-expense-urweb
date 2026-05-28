@@ -11,10 +11,6 @@ fun hasTransition oldState newState entries =
 
 val groupName = "detail_service"
 
-fun cleanupExpense expenseId =
-    dml (DELETE FROM audit_log WHERE ExpenseId = {[expenseId]});
-    dml (DELETE FROM expenses WHERE Id = {[expenseId]})
-
 fun allActorNamesPresent entries =
     case entries of
         [] => True
@@ -44,7 +40,7 @@ fun runAll () : transaction (list Test_harness.test_result) =
             List.length payload.Audit >= 2
             && allActorNamesPresent payload.Audit
     in
-        cleanupExpense expenseId;
+        Test_data_utils.cleanupExpense expenseId;
         return (Test_harness.mkResult "detail load returns requested expense" expenseMatchesRequestedId ::
                 Test_harness.mkResult "detail load resolves owner display name" ownerNameResolved ::
                 Test_harness.mkResult "detail audit includes submission transition" auditIncludesSubmission ::

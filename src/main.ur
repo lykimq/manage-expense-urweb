@@ -15,13 +15,8 @@ fun home () =
 fun create () =
     Log.info "main" "GET /Main/create";
     userId <- Session.requireUser ();
-    Policy.requireRole "Employee" userId;
+    Policy.requireRole Roles.Employee userId;
     Create_expense.page ()
-
-fun dashboard () =
-    Log.info "main" "GET /Main/dashboard";
-    _ <- Session.requireUser ();
-    Dashboard.page ()
 
 fun detail id =
     Log.info "main" ("GET /Main/detail id=" ^ show id);
