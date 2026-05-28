@@ -15,3 +15,20 @@ fun loadExpenses role userId =
 fun loadWorkspace role userId =
     expenses <- loadExpenses role userId;
     return {PanelTitle = panelTitle role, Expenses = expenses}
+
+fun queuePanelTitle role =
+    case role of
+        "Manager" => "Submitted Expenses"
+      | "Finance" => "Approved Expenses"
+      | _ => "Approval Queue"
+
+fun loadQueueWorkspace role userId =
+    case role of
+        "Manager" =>
+        exps <- Expense_db.getByState (show State.Submitted);
+        return {PanelTitle = queuePanelTitle role, Expenses = exps}
+      | "Finance" =>
+        exps <- Expense_db.getByState (show State.Approved);
+        return {PanelTitle = queuePanelTitle role, Expenses = exps}
+      | _ =>
+        error <xml><p><b>You are not allowed to view the approval queue.</b></p></xml>

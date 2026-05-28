@@ -30,6 +30,5 @@ fun detail id =
 
 fun queue () =
     Log.info "main" "GET /Main/queue";
-    userId <- Session.requireUser ();
-    Policy.requireRole "Manager" userId;
+    _ <- Session.requireUser ();
     Approval_queue.page ()

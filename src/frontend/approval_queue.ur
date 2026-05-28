@@ -1,27 +1,28 @@
-(* Approval queue placeholder page *)
-
-fun queueRow expenseId title created amount category state =
+fun queueRow e =
     <xml>
       <tr>
-        <td>{[show expenseId]}</td>
-        <td>{[title]}</td>
-        <td>{[created]}</td>
-        <td>{[show amount]}</td>
-        <td>{[category]}</td>
-        <td>{[state]}</td>
-        <td><a href="/Main/detail">Open</a></td>
+        <td>{[show e.Id]}</td>
+        <td>{[e.Title]}</td>
+        <td>{[show e.CreatedAt]}</td>
+        <td>{[show e.Amount]}</td>
+        <td>{[e.Category]}</td>
+        <td>{[e.State]}</td>
+        <td><a href={bless ("/Main/detail/" ^ show e.Id)}>Open</a></td>
       </tr>
     </xml>
 
 fun content () =
-    <xml>
+    userInfo <- Session.requireUserInfo ();
+    userId <- Session.requireUser ();
+    workspace <- Dashboard_service.loadQueueWorkspace userInfo.Role userId;
+    return <xml>
       <header>
         <h1>Approval Queue</h1>
         <p>Expenses currently awaiting review or payment action.</p>
       </header>
 
       <article>
-        <h2>Pending Actions</h2>
+        <h2>{[workspace.PanelTitle]}</h2>
         <table>
           <thead>
             <tr>
@@ -35,12 +36,14 @@ fun content () =
             </tr>
           </thead>
           <tbody>
-            {queueRow 3 "Office supplies" "2026-05-25" 120.00 "Office" "Submitted"}
-            {queueRow 4 "Laptop" "2026-05-20" 1200.00 "Equipment" "Approved"}
+            {case workspace.Expenses of
+                 [] => <xml><tr><td><span>No expenses to show.</span></td></tr></xml>
+               | _ => List.mapX queueRow workspace.Expenses}
           </tbody>
         </table>
       </article>
     </xml>
 
 fun page () =
-    Layout.wrap "Approval Queue" (content ())
+    body <- content ();
+    Layout.wrap "Approval Queue" body
