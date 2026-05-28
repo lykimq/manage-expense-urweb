@@ -60,7 +60,7 @@ fun getByState state =
                           expenses.CreatedAt, expenses.UpdatedAt
                    FROM expenses
                    WHERE expenses.State = {[state]}
-                   ORDER BY expenses.Id DESC, expenses.CreatedAt DESC)
+                   ORDER BY expenses.CreatedAt ASC, expenses.Id ASC)
                   (fn r acc => return (rowFromExpenses r :: acc))
                   [];
     return (List.rev rows)
