@@ -7,14 +7,14 @@ onError Error_page.err
 file /base.css src/static/base.css
 file /dashboard.css src/static/dashboard.css
 file /expense.css src/static/expense.css
-file /logic.css src/static/logic.css
+file /login.css src/static/login.css
 file /expense-detail.css src/static/expense_detail.css
 file /approval-queue.css src/static/approval_queue.css
 file /bfcache.js src/static/bfcache.js
 allow url /base.css
 allow url /dashboard.css
 allow url /expense.css
-allow url /logic.css
+allow url /login.css
 allow url /expense-detail.css
 allow url /approval-queue.css
 allow url /bfcache.js

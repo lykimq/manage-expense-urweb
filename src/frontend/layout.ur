@@ -7,7 +7,7 @@ fun headContent ttl =
         <link rel="stylesheet" type="text/css" href="/base.css"/>
         <link rel="stylesheet" type="text/css" href="/dashboard.css"/>
         <link rel="stylesheet" type="text/css" href="/expense.css"/>
-        <link rel="stylesheet" type="text/css" href="/logic.css"/>
+        <link rel="stylesheet" type="text/css" href="/login.css"/>
         <link rel="stylesheet" type="text/css" href="/expense-detail.css"/>
         <link rel="stylesheet" type="text/css" href="/approval-queue.css"/>
       </head>
