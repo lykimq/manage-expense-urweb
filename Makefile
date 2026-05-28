@@ -5,6 +5,11 @@ EXE := $(PROJECT).exe
 URL := http://localhost:$(PORT)/Main/login
 TEST_PORT ?= 18081
 TEST_URL := http://localhost:$(TEST_PORT)/Main/login
+TEST_SUITE_PROJECT := tests/test
+TEST_SUITE_URP := $(TEST_SUITE_PROJECT).urp
+TEST_SUITE_EXE := $(TEST_SUITE_PROJECT).exe
+TEST_SUITE_PORT ?= 18082
+TEST_SUITE_URL := http://localhost:$(TEST_SUITE_PORT)/Test_main/main
 
 .PHONY: all help web test db seed remove-db check-db clean-session clean
 
@@ -16,9 +21,12 @@ help:
 	@echo "  make web      Build and run dev server (auto rebuild app only)"
 	@echo "  make seed         Re-apply sample data (requires db)"
 	@echo "  make remove-db    Delete all app rows and reset sequences"
-	@echo "  make test         Build, run server briefly, and smoke test on $(TEST_PORT)"
+	@echo "  make test         Run smoke + full test suite"
 	@echo "  make clean-session  Drop the session signing key ($(SIG))"
 	@echo "  make clean        Remove app.exe, generated SQL, and $(SIG)"
+
+$(TEST_SUITE_EXE): $(TEST_SUITE_URP) $(APP_SRCS)
+	$(URWEB) $(TEST_SUITE_PROJECT)
 
 $(EXE): $(URP) $(APP_SRCS)
 	$(URWEB) $(PROJECT)
@@ -89,7 +97,7 @@ web: check-db $(EXE)
 		echo "Change detected. Rebuilding app..."; \
 	done
 
-test: check-db $(EXE)
+test: check-db $(EXE) $(TEST_SUITE_EXE)
 	@if ss -ltn "( sport = :$(TEST_PORT) )" | tail -n +2 | grep -q .; then \
 		echo "test: port $(TEST_PORT) is already in use. Override with TEST_PORT=<port>."; \
 		exit 1; \
@@ -111,6 +119,33 @@ test: check-db $(EXE)
 	fi; \
 	kill $$pid 2>/dev/null || true; \
 	wait $$pid 2>/dev/null || true; \
+	if [ $$rc -ne 0 ]; then \
+		exit $$rc; \
+	fi; \
+	if ss -ltn "( sport = :$(TEST_SUITE_PORT) )" | tail -n +2 | grep -q .; then \
+		echo "test-suite: port $(TEST_SUITE_PORT) is already in use. Override with TEST_SUITE_PORT=<port>."; \
+		exit 1; \
+	fi
+	@./$(TEST_SUITE_EXE) -p $(TEST_SUITE_PORT) & \
+	pid=$$!; \
+	sleep 1; \
+	if ! kill -0 $$pid 2>/dev/null; then \
+		echo "test-suite: app failed to start on port $(TEST_SUITE_PORT)."; \
+		wait $$pid 2>/dev/null || true; \
+		exit 1; \
+	fi; \
+	body=$$(curl -sf $(TEST_SUITE_URL)); \
+	decoded=$$(printf '%s\n' "$$body" | sed 's/&#10;/\n/g'); \
+	printf '%s\n' "$$decoded" | grep -oE '^(TEST|SUMMARY|RESULT).*' || true; \
+	if printf '%s\n' "$$body" | grep -q 'ALL_TESTS_PASSED'; then \
+		echo "test-suite: ok ($(TEST_SUITE_URL))"; \
+		rc=0; \
+	else \
+		echo "test-suite: failed ($(TEST_SUITE_URL))"; \
+		rc=1; \
+	fi; \
+	kill $$pid 2>/dev/null || true; \
+	wait $$pid 2>/dev/null || true; \
 	exit $$rc
 
 clean-session:
@@ -118,4 +153,4 @@ clean-session:
 	@echo "clean-session: removed $(SIG); existing browser sessions are now invalid."
 
 clean:
-	rm -f $(EXE) $(SQL) $(SIG)
+	rm -f $(EXE) $(TEST_SUITE_EXE) $(SQL) $(SIG)

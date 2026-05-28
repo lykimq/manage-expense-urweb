@@ -1,5 +1,11 @@
 open Tables
 
+fun roleMatches expectedRole actualRole =
+    expectedRole = actualRole
+
+fun canActOnExpense actorId ownerId =
+    actorId <> ownerId
+
 fun roleForUser userId =
     oneOrNoRows (SELECT users.Role
                  FROM users
@@ -13,7 +19,7 @@ fun requireRole expectedRole userId =
         (Log.warn "policy" ("requireRole rejected (user not found): id=" ^ show userId);
          error <xml><p><b>User not found.</b></p></xml>)
       | Some roleRow =>
-        if roleRow.Users.Role = expectedRole then
+        if roleMatches expectedRole roleRow.Users.Role then
             return ()
         else
             (Log.warn "policy"
@@ -24,7 +30,7 @@ fun requireRole expectedRole userId =
 
 (* Abort when actorId is the expense owner (no self-approval). *)
 fun requireNotOwner actorId ownerId =
-    if actorId = ownerId then
+    if not (canActOnExpense actorId ownerId) then
         (Log.warn "policy"
            ("requireNotOwner rejected: actor and owner both id=" ^ show actorId);
          error <xml><p><b>You cannot act on your own expense.</b></p></xml>)

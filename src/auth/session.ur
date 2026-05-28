@@ -1,5 +1,19 @@
 open Tables
 
+fun hasCurrentUser currentUserOpt =
+    case currentUserOpt of
+        Some _ => True
+      | None => False
+
+fun shouldRedirectRequireUser currentUserOpt =
+    not (hasCurrentUser currentUserOpt)
+
+fun shouldRedirectRequireGuest currentUserOpt =
+    hasCurrentUser currentUserOpt
+
+fun shouldRedirectRequireUserInfo hasUserInfo =
+    not hasUserInfo
+
 (* Signed-in user id. *)
 cookie user_session : {UserId : int}
 
@@ -47,29 +61,36 @@ fun currentUserInfo () =
 (* Must be logged in; otherwise redirect to login. Returns user id. *)
 fun requireUser () =
     currentUserOpt <- currentUser ();
-    case currentUserOpt of
-        Some id => return id
-      | None =>
+    if shouldRedirectRequireUser currentUserOpt then
         (Log.debug "session" "requireUser rejected (no session)";
          redirect (bless "/Main/login"))
+    else
+        case currentUserOpt of
+            Some id => return id
+          | None => error <xml><p><b>Unexpected session state.</b></p></xml>
 
 (* Like requireUser, but returns name, role, and email from the DB. *)
 fun requireUserInfo () =
     userInfoOpt <- currentUserInfo ();
-    case userInfoOpt of
-        Some info => return info
-      | None =>
+    if shouldRedirectRequireUserInfo
+           (case userInfoOpt of
+                Some _ => True
+              | None => False) then
         (Log.debug "session" "requireUserInfo rejected (no session or user row)";
          redirect (bless "/Main/login"))
+    else
+        case userInfoOpt of
+            Some info => return info
+          | None => error <xml><p><b>Unexpected user info state.</b></p></xml>
 
 (* Login page only; redirect to home if already signed in. *)
 fun requireGuest () =
     currentUserOpt <- currentUser ();
-    case currentUserOpt of
-        Some _ =>
+    if shouldRedirectRequireGuest currentUserOpt then
         (Log.debug "session" "requireGuest redirecting to home";
          redirect (bless "/Main/home"))
-      | None => return ()
+    else
+        return ()
 
 fun loginByEmail email =
     matchedUserOpt <- oneOrNoRows (SELECT users.Id

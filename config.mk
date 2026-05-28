@@ -23,6 +23,10 @@ SIG := app.sig
 # Ur/Web sources watched for rebuild (add a directory when you add a module tree)
 APP_SRCS := $(wildcard src/*.ur) \
             $(wildcard src/*.urs) \
+            $(wildcard tests/logic/*.ur) \
+            $(wildcard tests/logic/*.urs) \
+            $(wildcard tests/integration/*.ur) \
+            $(wildcard tests/integration/*.urs) \
             $(wildcard src/util/*.ur) \
             $(wildcard src/util/*.urs) \
             $(wildcard src/auth/*.ur) \

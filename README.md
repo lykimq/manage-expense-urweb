@@ -200,10 +200,24 @@ Useful commands:
 ```bash
 make db           # schema + extra.sql constraints + seed data
 make web          # run local dev server on port 8081
-make test         # smoke check only
+make test         # full automated test suite
 make remove-db    # clear app tables and reset sequences
 make clean-session
 ```
+
+## Tests
+
+The project includes a focused automated suite under `tests/`.
+
+- logic tests validate workflow, policy, and session rules
+- integration tests validate service behavior and audit side effects
+- `make test` runs the suite and prints grouped results plus a final summary
+
+This is intentionally not a UI testing setup. For this demo, tests focus on
+business correctness, authorization rules, state transitions, and transactional
+effects in the database.
+
+See `tests/README.md` for details.
 
 ## If you are learning Ur/Web
 
