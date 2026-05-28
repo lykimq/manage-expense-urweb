@@ -1,18 +1,12 @@
 (* Dashboard markup only; data from Dashboard_service. *)
 
-fun formatCreated stamp =
-    show stamp
-
-fun formatAmount amount =
-    Amount.amountToString amount
-
 fun expenseRow e =
     <xml>
       <tr>
         <td>{[show e.Id]}</td>
         <td>{[e.Title]}</td>
-        <td>{[formatCreated e.CreatedAt]}</td>
-        <td>{[formatAmount e.Amount]}</td>
+        <td>{[show e.CreatedAt]}</td>
+        <td>{[show e.Amount]}</td>
         <td>{[e.Category]}</td>
         <td>{[e.State]}</td>
         <td><a href={bless ("/Main/detail/" ^ show e.Id)}>View</a></td>
@@ -22,7 +16,7 @@ fun expenseRow e =
 fun expenseRows exps =
     case exps of
         [] => <xml><tr><td><span>No expenses to show.</span></td></tr></xml>
-      | e :: es => <xml>{expenseRow e}{expenseRows es}</xml>
+      | _ => List.mapX expenseRow exps
 
 fun panel title tableRows =
     <xml>

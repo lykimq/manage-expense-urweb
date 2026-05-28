@@ -1,6 +1,6 @@
 datatype expense_state = Submitted | Approved | Rejected | Paid
 
-fun toString state =
+fun stateToString state =
     case state of
         Submitted => "Submitted"
       | Approved => "Approved"
@@ -15,6 +15,5 @@ fun fromString s =
       | "Paid" => Some Paid
       | _ => None
 
-(* show instance used to render expense_state as text *)
 val show_expense_state : show expense_state =
-    mkShow toString
+    mkShow stateToString

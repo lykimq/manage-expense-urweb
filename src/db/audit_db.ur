@@ -39,6 +39,7 @@ fun getByExpense expenseId =
                   audit_log.OldState, audit_log.NewState, audit_log.Comment,
                   audit_log.Stamp
            FROM audit_log
-           WHERE audit_log.ExpenseId = {[expenseId]})
-          (fn r rows => return (rowFromAuditLog r :: rows))
+           WHERE audit_log.ExpenseId = {[expenseId]}
+           ORDER BY audit_log.Stamp ASC)
+          (fn r rows => return (List.append rows (rowFromAuditLog r :: [])))
           []

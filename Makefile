@@ -4,7 +4,7 @@ URP := $(PROJECT).urp
 EXE := $(PROJECT).exe
 URL := http://localhost:$(PORT)/Main/login
 
-.PHONY: all help web test db seed check-db clean-session clean
+.PHONY: all help web test db seed remove-db check-db clean-session clean
 
 all: help
 
@@ -13,6 +13,7 @@ help:
 	@echo "  make db       Setup database (schema + constraints + seed)"
 	@echo "  make web      Build and run dev server (auto rebuild app only)"
 	@echo "  make seed         Re-apply sample data (requires db)"
+	@echo "  make remove-db    Delete all app rows and reset sequences"
 	@echo "  make test         Build, run server briefly, and smoke test"
 	@echo "  make clean-session  Drop the session signing key ($(SIG))"
 	@echo "  make clean        Remove app.exe, generated SQL, and $(SIG)"
@@ -55,6 +56,11 @@ seed: check-db
 		echo "seed: missing $(SEED_SQL)"; \
 		exit 1; \
 	fi
+
+remove-db: check-db
+	@$(PSQL) -v ON_ERROR_STOP=1 $(DB) -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$(DB)' AND pid <> pg_backend_pid();"
+	@$(PSQL) -v ON_ERROR_STOP=1 $(DB) -c "TRUNCATE TABLE uw_tables_audit_log, uw_tables_expenses, uw_tables_users RESTART IDENTITY CASCADE;"
+	@echo "remove-db: cleared app tables and reset sequences ($(DB))"
 
 web: check-db $(EXE)
 	@url="$(URL)"; \

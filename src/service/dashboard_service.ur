@@ -8,8 +8,8 @@ fun panelTitle role =
 fun loadExpenses role userId =
     case role of
         "Employee" => Expense_db.getByOwner userId
-      | "Manager" => Expense_db.getByState (State.toString State.Submitted)
-      | "Finance" => Expense_db.getByState (State.toString State.Approved)
+      | "Manager" => Expense_db.getByState (show State.Submitted)
+      | "Finance" => Expense_db.getByState (show State.Approved)
       | _ => return []
 
 fun loadWorkspace role userId =

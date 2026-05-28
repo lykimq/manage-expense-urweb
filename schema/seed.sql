@@ -29,3 +29,11 @@ VALUES
   (4, 4, 1, '',          'Submitted', 'Submitted for equipment purchase', '2026-05-20 16:00:00'),
   (5, 4, 2, 'Submitted', 'Approved',  'Approved by manager',              '2026-05-21 09:05:00')
 ON CONFLICT (uw_id) DO NOTHING;
+
+-- Keep Ur/Web sequences in sync with seeded primary keys.
+SELECT setval('uw_tables_user_id_seq',
+              COALESCE((SELECT MAX(uw_id) FROM uw_tables_users), 0));
+SELECT setval('uw_tables_expense_id_seq',
+              COALESCE((SELECT MAX(uw_id) FROM uw_tables_expenses), 0));
+SELECT setval('uw_tables_audit_id_seq',
+              COALESCE((SELECT MAX(uw_id) FROM uw_tables_audit_log), 0));

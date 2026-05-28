@@ -34,17 +34,18 @@ allow responseHeader Expires
 script /bfcache.js
 
 # Module load order (top to bottom)
+$/list
 schema/tables
 src/workflow/state
 src/workflow/transition
 src/util/log
-src/util/amount
 src/auth/session
 src/auth/policy
 src/db/user_db
 src/db/expense_db
 src/db/audit_db
 src/service/expense_service
+src/service/detail_service
 src/service/dashboard_service
 src/expense
 src/frontend/layout
@@ -52,6 +53,8 @@ src/frontend/error_page
 src/frontend/login
 src/frontend/dashboard
 src/frontend/create_expense
+src/frontend/expense_detail_view
+src/frontend/expense_detail_actions
 src/frontend/expense_detail
 src/frontend/approval_queue
 src/frontend/home

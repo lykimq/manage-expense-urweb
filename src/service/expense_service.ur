@@ -19,23 +19,23 @@ fun requireTransition allowed state actionLabel =
         return ()
     else
         (Log.warn "expense_service"
-           ("transition rejected: " ^ actionLabel ^ " from " ^ State.toString state);
+           ("transition rejected: " ^ actionLabel ^ " from " ^ show state);
          error <xml><p><b>This action is not allowed for the current expense state.</b></p></xml>)
 
 fun applyTransition userId expense expenseId newState comment =
     let val oldState = expense.State in
         stamp <- now;
-        Expense_db.updateState expenseId (State.toString newState) stamp;
+        Expense_db.updateState expenseId (show newState) stamp;
         _ <- Audit_db.insert {ExpenseId = expenseId,
                               ActorId = userId,
                               OldState = oldState,
-                              NewState = State.toString newState,
+                              NewState = show newState,
                               Comment = comment};
         return ()
     end
 
 fun parseAmount s =
-    case Amount.parseFloat s of
+    case read s : option float of
         None => error <xml><p><b>Amount must be a valid number.</b></p></xml>
       | Some amount => return amount
 
@@ -47,11 +47,11 @@ fun create userId fields =
                                     Category = fields.Category,
                                     Description = fields.Description,
                                     OwnerId = userId,
-                                    State = State.toString State.Submitted};
+                                    State = show State.Submitted};
     _ <- Audit_db.insert {ExpenseId = expenseId,
                           ActorId = userId,
                           OldState = "",
-                          NewState = State.toString State.Submitted,
+                          NewState = show State.Submitted,
                           Comment = "Submitted for approval"};
     Log.info "expense_service" ("create expense_id=" ^ show expenseId);
     return expenseId
