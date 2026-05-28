@@ -15,6 +15,8 @@ Tests are split by concern:
 - `tests/logic/`: pure rule checks (state, transitions, policy, session)
 - `tests/integration/`: service-level checks using real DB operations on a
   dedicated test database (`expense_test_db`)
+- `tests/http.urp` + `tests/http_checks.sh`: HTTP-level checks for redirects,
+  login/logout flow, and queue access denial behavior
 
 This structure matches the implementation style:
 
@@ -52,14 +54,23 @@ Logic tests:
 
 - `state_test`: state string mapping and parsing behavior
 - `transition_test`: transition truth table and invariants
-- `policy_tests`: role matching and owner/non-owner checks
-- `session_tests`: session and redirect decision helpers
+- `expense_service_amount_tests`: amount parsing acceptance/rejection
+- `create_expense_validation_tests`: required-field validation checks
+- `policy_tests`: role matching and owner/non-owner checks via Policy module
+- `session_tests`: Session module checks (login, logout, cookie helpers)
 
 Integration tests:
 
-- `expense_service_tests`: create -> approve -> pay flow and audit rows
+- `expense_service_tests`: create -> approve/pay/reject flows and audit rows
 - `dashboard_service_tests`: role-based workspace and queue data
 - `detail_service_tests`: detail payload, owner name, audit timeline shape
+
+HTTP checks:
+
+- unauthenticated `/Main/home` redirects to `/Main/login`
+- authenticated user visiting `/Main/login` redirects to `/Main/home`
+- login and logout flow works with real cookies
+- Employee access to `/Main/queue` is denied with server-rendered error message
 
 ## What this suite does not focus on
 
@@ -80,6 +91,9 @@ make test
 ```
 
 `make test` initializes and uses only the dedicated test database
-(`expense_test_db`). It does not need app DB data.
+(`expense_test_db`). It does not need app DB data, and it runs both:
+
+- the in-process test suite at `/Test_main/main`
+- HTTP integration checks against `tests/http.urp`
 
 The output is grouped by test module and ends with a pass/fail summary.

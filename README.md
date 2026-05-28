@@ -212,6 +212,7 @@ The project includes a focused automated suite under `tests/`.
 
 - logic tests validate workflow, policy, and session rules
 - integration tests validate service behavior and audit side effects
+- HTTP checks validate login/logout redirects and queue access control
 - `make test` runs the suite against a dedicated test database (`expense_test_db`)
   and prints grouped results plus a final summary
 
@@ -225,9 +226,9 @@ Why this project uses a real dedicated test database instead of a mock:
   PostgreSQL
 - a dedicated test DB keeps this confidence without polluting app/dev data
 
-This is intentionally not a UI testing setup. For this demo, tests focus on
-business correctness, authorization rules, state transitions, and transactional
-effects in the database.
+This is intentionally not a browser automation setup. For this demo, tests focus
+on business correctness, authorization rules, state transitions, transactional
+effects in the database, and key HTTP auth/redirect behavior.
 
 See `tests/README.md` for details.
 
@@ -250,5 +251,5 @@ That order matches the point of the project: business rules first, UI second.
 - `src/service`: transactional business actions
 - `src/db`: typed database access functions
 - `src/frontend`: pages and form handlers
-- `tests`: logic and integration test suite (runs on dedicated test DB)
+- `tests`: logic, integration, and HTTP checks (runs on dedicated test DB)
 - `schema`: table declarations, extra constraints, seed data

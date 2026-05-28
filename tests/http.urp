@@ -1,0 +1,52 @@
+database dbname=expense_test_db
+sql ../schema/schema.sql
+sigfile test.sig
+onError Error_page.err
+file /base.css ../src/static/base.css
+file /dashboard.css ../src/static/dashboard.css
+file /expense.css ../src/static/expense.css
+file /logic.css ../src/static/logic.css
+file /expense-detail.css ../src/static/expense_detail.css
+file /approval-queue.css ../src/static/approval_queue.css
+allow url /base.css
+allow url /dashboard.css
+allow url /expense.css
+allow url /logic.css
+allow url /expense-detail.css
+allow url /approval-queue.css
+allow url /Main/login
+allow url /Main/logout
+allow url /Main/home
+allow url /Main/create
+allow url /Main/detail
+allow url /Main/detail/*
+allow url /Main/queue
+allow responseHeader Cache-Control
+allow responseHeader Pragma
+allow responseHeader Expires
+
+$/list
+../schema/tables
+../src/workflow/state
+../src/workflow/transition
+../src/util/log
+../src/auth/roles
+../src/auth/session
+../src/auth/policy
+../src/db/user_db
+../src/db/expense_db
+../src/db/audit_db
+../src/service/expense_service
+../src/service/detail_service
+../src/service/dashboard_service
+../src/frontend/layout
+../src/frontend/error_page
+../src/frontend/login
+../src/frontend/dashboard
+../src/frontend/create_expense
+../src/frontend/expense_detail_view
+../src/frontend/expense_detail_actions
+../src/frontend/expense_detail
+../src/frontend/approval_queue
+../src/frontend/home
+../src/main
