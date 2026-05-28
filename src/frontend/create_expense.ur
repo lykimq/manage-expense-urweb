@@ -5,28 +5,63 @@ fun hasRequiredFields r =
     && r.Amount <> ""
     && r.Category <> ""
 
-fun missingFieldsPage () =
-    Layout.wrap "Create Expense"
-      <xml>
-        <header>
-          <h1>Create Expense</h1>
-          <p>Please fill all required fields before continuing.</p>
-        </header>
-        <article>
-          <p>
-            Required fields are Title, Amount, and Category.
-          </p>
-          <p>
-            <a href="/Main/home">Back to Home</a>
-          </p>
-        </article>
-      </xml>
-
 fun formAction r =
     userId <- Session.requireUser ();
     Policy.requireRole "Employee" userId;
     if not (hasRequiredFields r) then
-        missingFieldsPage ()
+        Layout.wrap "Create Expense"
+          <xml>
+            <header>
+              <h1>Create Expense</h1>
+              <p>Fields marked with * are required.</p>
+            </header>
+
+            <article>
+              <h2>Expense Details</h2>
+              <p>Fill in the fields below and submit for approval.</p>
+              <p style="color:#b91c1c; background:#fee2e2; border:1px solid #fecaca; border-radius:8px; padding:10px 12px;">
+                <b>Please fill all required fields before continuing.</b>
+              </p>
+              <form>
+                <table>
+                  <tr>
+                    <th>
+                      {if r.Title = "" then
+                           <xml><label style="color:#b91c1c;">Title * (required)</label></xml>
+                       else
+                           <xml><label>Title *</label></xml>}
+                    </th>
+                    <td><textbox{#Title} value={r.Title}/></td>
+                  </tr>
+                  <tr>
+                    <th>
+                      {if r.Amount = "" then
+                           <xml><label style="color:#b91c1c;">Amount * (required)</label></xml>
+                       else
+                           <xml><label>Amount *</label></xml>}
+                    </th>
+                    <td><textbox{#Amount} value={r.Amount}/></td>
+                  </tr>
+                  <tr>
+                    <th>
+                      {if r.Category = "" then
+                           <xml><label style="color:#b91c1c;">Category * (required)</label></xml>
+                       else
+                           <xml><label>Category *</label></xml>}
+                    </th>
+                    <td><textbox{#Category} value={r.Category}/></td>
+                  </tr>
+                  <tr>
+                    <th><label>Description</label></th>
+                    <td><textarea{#Description}/></td>
+                  </tr>
+                </table>
+                <p>
+                  <submit value="Submit for Approval" action={formAction}/>
+                </p>
+              </form>
+            </article>
+          </xml>
     else
         expenseId <- Expense_service.create userId
           {Title = r.Title,
