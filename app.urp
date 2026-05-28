@@ -47,7 +47,6 @@ src/db/audit_db
 src/service/expense_service
 src/service/detail_service
 src/service/dashboard_service
-src/expense
 src/frontend/layout
 src/frontend/error_page
 src/frontend/login

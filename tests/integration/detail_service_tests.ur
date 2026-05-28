@@ -1,3 +1,5 @@
+open Tables
+
 fun hasTransition oldState newState entries =
     case entries of
         [] => False
@@ -8,6 +10,10 @@ fun hasTransition oldState newState entries =
             hasTransition oldState newState rest
 
 val groupName = "detail_service"
+
+fun cleanupExpense expenseId =
+    dml (DELETE FROM audit_log WHERE ExpenseId = {[expenseId]});
+    dml (DELETE FROM expenses WHERE Id = {[expenseId]})
 
 fun allActorNamesPresent entries =
     case entries of
@@ -23,9 +29,13 @@ fun runAll () : transaction (list Test_harness.test_result) =
                   Description = "Detail service integration test"};
     Expense_service.approve 2 expenseId "Approved for detail view";
     payload <- Detail_service.load expenseId;
+    ownerOpt <- User_db.getById payload.Expense.OwnerId;
     let
         val expenseMatchesRequestedId = payload.Expense.Id = expenseId
-        val ownerNameResolved = payload.OwnerName = "Quyen Ly"
+        val ownerNameResolved =
+            case ownerOpt of
+                None => payload.OwnerName = "Unknown"
+              | Some owner => payload.OwnerName = owner.FullName
         val auditIncludesSubmission =
             hasTransition "" (show State.Submitted) payload.Audit
         val auditIncludesApproval =
@@ -34,6 +44,7 @@ fun runAll () : transaction (list Test_harness.test_result) =
             List.length payload.Audit >= 2
             && allActorNamesPresent payload.Audit
     in
+        cleanupExpense expenseId;
         return (Test_harness.mkResult "detail load returns requested expense" expenseMatchesRequestedId ::
                 Test_harness.mkResult "detail load resolves owner display name" ownerNameResolved ::
                 Test_harness.mkResult "detail audit includes submission transition" auditIncludesSubmission ::

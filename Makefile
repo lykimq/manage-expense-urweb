@@ -18,6 +18,7 @@ all: help
 help:
 	@echo "Targets:"
 	@echo "  make db       Setup database (schema + constraints + seed)"
+	@echo "  make test-db      Setup dedicated test database"
 	@echo "  make web      Build and run dev server (auto rebuild app only)"
 	@echo "  make seed         Re-apply sample data (requires db)"
 	@echo "  make remove-db    Delete all app rows and reset sequences"
@@ -50,6 +51,23 @@ db: $(SQL)
 		$(PSQL) -v ON_ERROR_STOP=1 -f $(SEED_SQL) $(DB); \
 	fi
 	@echo "db: ready ($(DB))"
+
+# One-time test database setup: dedicated DB for integration tests.
+test-db: $(SQL)
+	-$(CREATEDB) $(TEST_DB) 2>/dev/null || true
+	@if $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(TEST_SQL_TABLE)'" $(TEST_DB) | grep -q 1; then \
+		echo "test-db: tables already exist ($(TEST_DB))"; \
+	else \
+		echo "test-db: applying schema ($(TEST_DB))"; \
+		$(PSQL) -v ON_ERROR_STOP=1 -f $(SQL) $(TEST_DB); \
+	fi
+	@if [ -f "$(EXTRA_SQL)" ]; then \
+		$(PSQL) -v ON_ERROR_STOP=1 -f $(EXTRA_SQL) $(TEST_DB); \
+	fi
+	@if [ -f "$(SEED_SQL)" ]; then \
+		$(PSQL) -v ON_ERROR_STOP=1 -f $(SEED_SQL) $(TEST_DB); \
+	fi
+	@echo "test-db: ready ($(TEST_DB))"
 
 # Lightweight check used by web/test; does not modify the database.
 check-db:
@@ -97,32 +115,8 @@ web: check-db $(EXE)
 		echo "Change detected. Rebuilding app..."; \
 	done
 
-test: check-db $(EXE) $(TEST_SUITE_EXE)
-	@if ss -ltn "( sport = :$(TEST_PORT) )" | tail -n +2 | grep -q .; then \
-		echo "test: port $(TEST_PORT) is already in use. Override with TEST_PORT=<port>."; \
-		exit 1; \
-	fi
-	@./$(EXE) -p $(TEST_PORT) & \
-	pid=$$!; \
-	sleep 1; \
-	if ! kill -0 $$pid 2>/dev/null; then \
-		echo "test: app failed to start on port $(TEST_PORT)."; \
-		wait $$pid 2>/dev/null || true; \
-		exit 1; \
-	fi; \
-	if curl -sf $(TEST_URL) | grep -q 'Expense'; then \
-		echo "test: ok ($(TEST_URL))"; \
-		rc=0; \
-	else \
-		echo "test: failed ($(TEST_URL))"; \
-		rc=1; \
-	fi; \
-	kill $$pid 2>/dev/null || true; \
-	wait $$pid 2>/dev/null || true; \
-	if [ $$rc -ne 0 ]; then \
-		exit $$rc; \
-	fi; \
-	if ss -ltn "( sport = :$(TEST_SUITE_PORT) )" | tail -n +2 | grep -q .; then \
+test: test-db $(TEST_SUITE_EXE)
+	@if ss -ltn "( sport = :$(TEST_SUITE_PORT) )" | tail -n +2 | grep -q .; then \
 		echo "test-suite: port $(TEST_SUITE_PORT) is already in use. Override with TEST_SUITE_PORT=<port>."; \
 		exit 1; \
 	fi

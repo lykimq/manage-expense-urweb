@@ -200,7 +200,8 @@ Useful commands:
 ```bash
 make db           # schema + extra.sql constraints + seed data
 make web          # run local dev server on port 8081
-make test         # full automated test suite
+make test-db      # create and seed dedicated test database
+make test         # full automated test suite (uses expense_test_db)
 make remove-db    # clear app tables and reset sequences
 make clean-session
 ```
@@ -211,7 +212,18 @@ The project includes a focused automated suite under `tests/`.
 
 - logic tests validate workflow, policy, and session rules
 - integration tests validate service behavior and audit side effects
-- `make test` runs the suite and prints grouped results plus a final summary
+- `make test` runs the suite against a dedicated test database (`expense_test_db`)
+  and prints grouped results plus a final summary
+
+Why this project uses a real dedicated test database instead of a mock:
+
+- workflow correctness depends on real SQL constraints, transaction behavior, and
+  persisted audit rows
+- service tests need to validate DB side effects (`create`, transition updates,
+  audit inserts) end to end
+- a mock DB can hide query/constraint/transaction issues that only appear in
+  PostgreSQL
+- a dedicated test DB keeps this confidence without polluting app/dev data
 
 This is intentionally not a UI testing setup. For this demo, tests focus on
 business correctness, authorization rules, state transitions, and transactional

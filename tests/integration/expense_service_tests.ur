@@ -1,8 +1,14 @@
+open Tables
+
 type create_case_out =
     {ExpenseId : int,
      Results : list Test_harness.test_result}
 
 val groupName = "expense_service"
+
+fun cleanupExpense expenseId =
+    dml (DELETE FROM audit_log WHERE ExpenseId = {[expenseId]});
+    dml (DELETE FROM expenses WHERE Id = {[expenseId]})
 
 fun testCreateCase () : transaction create_case_out =
     expenseId <- Expense_service.create 1
@@ -62,4 +68,5 @@ fun runAll () : transaction (list Test_harness.test_result) =
     createOut <- testCreateCase ();
     approveResults <- testApproveCase createOut.ExpenseId;
     payResults <- testPayCase createOut.ExpenseId;
+    cleanupExpense createOut.ExpenseId;
     return (List.append createOut.Results (List.append approveResults payResults))

@@ -1,3 +1,5 @@
+open Tables
+
 val groupName = "dashboard_service"
 
 type dashboard_request = {Role : string, UserId : int}
@@ -19,6 +21,10 @@ fun allInState expectedState expenses =
         [] => True
       | e :: rest =>
         e.State = expectedState && allInState expectedState rest
+
+fun cleanupExpense expenseId =
+    dml (DELETE FROM audit_log WHERE ExpenseId = {[expenseId]});
+    dml (DELETE FROM expenses WHERE Id = {[expenseId]})
 
 fun runAll () : transaction (list Test_harness.test_result) =
     submittedId <- Expense_service.create 1
@@ -56,6 +62,8 @@ fun runAll () : transaction (list Test_harness.test_result) =
             financeQueue.PanelTitle = "Approved Expenses"
             && hasExpenseId approvedId financeQueue.Expenses
     in
+        cleanupExpense submittedId;
+        cleanupExpense approvedId;
         return (Test_harness.mkResult "employee workspace returns owner expenses" employeeOwnExpensesVisible ::
                 Test_harness.mkResult "manager workspace returns submitted queue" managerSeesSubmittedOnly ::
                 Test_harness.mkResult "finance workspace returns approved queue" financeSeesApprovedOnly ::

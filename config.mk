@@ -3,6 +3,7 @@
 PROJECT  := app
 PORT     := 8081
 DB       := expense_db
+TEST_DB  := expense_test_db
 
 # Tool commands (override on the command line: make URWEB=/path/to/urweb web)
 URWEB    ?= urweb
@@ -16,6 +17,7 @@ SEED_SQL  := schema/seed.sql
 
 # Table used by make check-db to detect an initialized database
 SQL_TABLE := uw_tables_expenses
+TEST_SQL_TABLE := uw_tables_expenses
 
 # CSRF signing key filename (must match sigfile in app.urp)
 SIG := app.sig

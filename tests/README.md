@@ -13,7 +13,8 @@ single test entry point (`tests/test_main.ur`) that is run through `make test`.
 Tests are split by concern:
 
 - `tests/logic/`: pure rule checks (state, transitions, policy, session)
-- `tests/integration/`: service-level checks using real DB operations
+- `tests/integration/`: service-level checks using real DB operations on a
+  dedicated test database (`expense_test_db`)
 
 This structure matches the implementation style:
 
@@ -32,6 +33,18 @@ handler wiring. The tests focus on what still must be validated at runtime:
 - audit side effects across service calls
 
 This gives practical confidence while keeping the suite small and easy to run.
+
+## Why not mock the database
+
+For this project, integration tests intentionally use PostgreSQL instead of a
+mock database:
+
+- they need to verify transaction side effects across multiple writes
+- they need to verify real schema constraints and query behavior
+- they need to verify audit log persistence exactly as production code uses it
+
+A mock can still be useful for isolated unit tests, but it cannot replace these
+end-to-end data checks.
 
 ## What the tests cover
 
@@ -65,5 +78,8 @@ From repo root:
 ```bash
 make test
 ```
+
+`make test` initializes and uses only the dedicated test database
+(`expense_test_db`). It does not need app DB data.
 
 The output is grouped by test module and ends with a pass/fail summary.
