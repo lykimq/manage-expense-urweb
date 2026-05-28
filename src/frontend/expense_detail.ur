@@ -13,6 +13,10 @@ fun page expenseId =
         {Expense_detail_view.auditSection detail}
         <article>
           <h2>Actions</h2>
+          <p>
+            Choose the next step for this expense. Managers can approve or reject
+            Submitted expenses, and Finance can mark Approved expenses as paid.
+          </p>
           {actionBody}
         </article>
       </xml>

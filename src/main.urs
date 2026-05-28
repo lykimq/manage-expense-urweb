@@ -15,8 +15,8 @@ val create : unit -> transaction page
 (* Dashboard; any logged-in role. *)
 val dashboard : unit -> transaction page
 
-(* Expense detail placeholder; any logged-in role. *)
+(* Expense detail; any logged-in role. *)
 val detail : int -> transaction page
 
-(* Approval queue placeholder; Manager only. *)
+(* Approval queue; Manager and Finance only (enforced in service). *)
 val queue : unit -> transaction page

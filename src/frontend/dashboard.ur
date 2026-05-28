@@ -22,6 +22,10 @@ fun panel title tableRows =
     <xml>
       <article>
         <h2>{[title]}</h2>
+        {if title = "My Expenses" then
+             <xml><p>This table shows expenses submitted under your account.</p></xml>
+         else
+             <xml/>}
         <table>
           <thead>
             <tr>

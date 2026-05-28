@@ -34,6 +34,9 @@ fun metadataSection detail expenseId =
     <xml>
       <article>
         <h2>Metadata</h2>
+        <p>
+          This section shows the current snapshot of this expense record.
+        </p>
         <table>
           <tr>
             <th>Title</th>
@@ -75,14 +78,21 @@ fun auditSection detail =
     <xml>
       <article>
         <h2>Audit Timeline</h2>
+        <p>
+          This timeline is for the current expense only. Each row records one
+          state change, who made it, and when it happened.
+        </p>
+        <p>
+          Current status: <strong>{[detail.Expense.State]}</strong>
+        </p>
         <table>
           <thead>
             <tr>
-              <th>Stamp</th>
-              <th>Old State</th>
-              <th>New State</th>
+              <th>Changed At</th>
+              <th>From State</th>
+              <th>To State</th>
               <th>Comment</th>
-              <th>Actor</th>
+              <th>Changed By</th>
             </tr>
           </thead>
           <tbody>

@@ -32,15 +32,3 @@ main>article>table th {
 main>article>table td strong {
   color: var(--color-primary);
 }
-
-/* Manager decision radio list should not render bullet points. */
-main>article form radio {
-  display: block;
-  margin: 0;
-  padding: 0;
-}
-
-main>article form radio li {
-  list-style: none;
-  margin: 0 0 6px;
-}

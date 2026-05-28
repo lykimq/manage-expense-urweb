@@ -23,6 +23,9 @@ fun content () =
 
       <article>
         <h2>{[workspace.PanelTitle]}</h2>
+        <p>
+          Open an expense to review details and perform the next workflow action.
+        </p>
         <table>
           <thead>
             <tr>
@@ -42,6 +45,7 @@ fun content () =
           </tbody>
         </table>
       </article>
+
     </xml>
 
 fun page () =

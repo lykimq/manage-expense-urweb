@@ -12,7 +12,7 @@ fun managerAction expenseId r =
         redirect (detailUrl expenseId)
       | None =>
         error <xml><p><b>Choose Approve or Reject.</b></p></xml>
-      | Some _ =>
+      | _ =>
         error <xml><p><b>Invalid action.</b></p></xml>
 
 fun payForm expenseId () =
@@ -28,9 +28,10 @@ fun managerForms expenseId =
           <textarea{#Comment}/>
         </p>
         <p>
-          <radio{#Decision}>
-            <li><radioOption value="Approve"/> Approve</li>
-            <li><radioOption value="Reject"/> Reject</li>
+          <label style="display:inline-block; margin:0 12px 0 0;">Decision</label>
+          <radio{#Decision} style="display:inline-flex; gap:14px; margin:0; padding:0;">
+            <li style="list-style:none; margin:0;"><radioOption value="Approve"/> Approve</li>
+            <li style="list-style:none; margin:0;"><radioOption value="Reject"/> Reject</li>
           </radio>
         </p>
         <p>
