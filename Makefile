@@ -3,6 +3,8 @@ include config.mk
 URP := $(PROJECT).urp
 EXE := $(PROJECT).exe
 URL := http://localhost:$(PORT)/Main/login
+TEST_PORT ?= 18081
+TEST_URL := http://localhost:$(TEST_PORT)/Main/login
 
 .PHONY: all help web test db seed remove-db check-db clean-session clean
 
@@ -14,7 +16,7 @@ help:
 	@echo "  make web      Build and run dev server (auto rebuild app only)"
 	@echo "  make seed         Re-apply sample data (requires db)"
 	@echo "  make remove-db    Delete all app rows and reset sequences"
-	@echo "  make test         Build, run server briefly, and smoke test"
+	@echo "  make test         Build, run server briefly, and smoke test on $(TEST_PORT)"
 	@echo "  make clean-session  Drop the session signing key ($(SIG))"
 	@echo "  make clean        Remove app.exe, generated SQL, and $(SIG)"
 
@@ -88,14 +90,23 @@ web: check-db $(EXE)
 	done
 
 test: check-db $(EXE)
-	@./$(EXE) -p $(PORT) & \
+	@if ss -ltn "( sport = :$(TEST_PORT) )" | tail -n +2 | grep -q .; then \
+		echo "test: port $(TEST_PORT) is already in use. Override with TEST_PORT=<port>."; \
+		exit 1; \
+	fi
+	@./$(EXE) -p $(TEST_PORT) & \
 	pid=$$!; \
 	sleep 1; \
-	if curl -sf $(URL) | grep -q 'Expense'; then \
-		echo "test: ok ($(URL))"; \
+	if ! kill -0 $$pid 2>/dev/null; then \
+		echo "test: app failed to start on port $(TEST_PORT)."; \
+		wait $$pid 2>/dev/null || true; \
+		exit 1; \
+	fi; \
+	if curl -sf $(TEST_URL) | grep -q 'Expense'; then \
+		echo "test: ok ($(TEST_URL))"; \
 		rc=0; \
 	else \
-		echo "test: failed ($(URL))"; \
+		echo "test: failed ($(TEST_URL))"; \
 		rc=1; \
 	fi; \
 	kill $$pid 2>/dev/null || true; \
