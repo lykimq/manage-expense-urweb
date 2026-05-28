@@ -40,7 +40,7 @@ fun content () =
           </thead>
           <tbody>
             {case workspace.Expenses of
-                 [] => <xml><tr><td><span>No expenses to show.</span></td></tr></xml>
+                 [] => <xml><tr><td colspan={7}><span>No expenses to show.</span></td></tr></xml>
                | _ => List.mapX queueRow workspace.Expenses}
           </tbody>
         </table>

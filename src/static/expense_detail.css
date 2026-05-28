@@ -32,3 +32,20 @@ main>article>table th {
 main>article>table td strong {
   color: var(--color-primary);
 }
+
+main > article form p > label {
+  display: inline-block;
+  margin: 0 12px 0 0;
+}
+
+main > article form p > radio {
+  display: inline-flex;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+}
+
+main > article form p > radio li {
+  list-style: none;
+  margin: 0;
+}

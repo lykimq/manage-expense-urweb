@@ -23,22 +23,18 @@ fun missingFieldsPage () =
       </xml>
 
 fun formAction r =
-    let
-        val _ = r.Description
-    in
-        userId <- Session.requireUser ();
-        Policy.requireRole "Employee" userId;
-        if not (hasRequiredFields r) then
-            missingFieldsPage ()
-        else
-            expenseId <- Expense_service.create userId
-              {Title = r.Title,
-               Amount = r.Amount,
-               Category = r.Category,
-               Description = r.Description};
-            Log.info "create_expense" ("created expense_id=" ^ show expenseId);
-            redirect (bless "/Main/home")
-    end
+    userId <- Session.requireUser ();
+    Policy.requireRole "Employee" userId;
+    if not (hasRequiredFields r) then
+        missingFieldsPage ()
+    else
+        expenseId <- Expense_service.create userId
+          {Title = r.Title,
+           Amount = r.Amount,
+           Category = r.Category,
+           Description = r.Description};
+        Log.info "create_expense" ("created expense_id=" ^ show expenseId);
+        redirect (bless "/Main/home")
 
 fun content () =
     <xml>

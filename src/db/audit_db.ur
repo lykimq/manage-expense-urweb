@@ -35,11 +35,12 @@ fun insert data =
     return id
 
 fun getByExpense expenseId =
-    query (SELECT audit_log.Id, audit_log.ExpenseId, audit_log.ActorId,
-                  audit_log.OldState, audit_log.NewState, audit_log.Comment,
-                  audit_log.Stamp
-           FROM audit_log
-           WHERE audit_log.ExpenseId = {[expenseId]}
-           ORDER BY audit_log.Stamp ASC)
-          (fn r rows => return (List.append rows (rowFromAuditLog r :: [])))
-          []
+    rows <- query (SELECT audit_log.Id, audit_log.ExpenseId, audit_log.ActorId,
+                          audit_log.OldState, audit_log.NewState, audit_log.Comment,
+                          audit_log.Stamp
+                   FROM audit_log
+                   WHERE audit_log.ExpenseId = {[expenseId]}
+                   ORDER BY audit_log.Stamp ASC)
+                  (fn r acc => return (rowFromAuditLog r :: acc))
+                  [];
+    return (List.rev rows)

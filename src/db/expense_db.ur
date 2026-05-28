@@ -42,24 +42,28 @@ fun getById id =
             | Some row => Some (rowFromExpenses row))
 
 fun getByOwner ownerId =
-    query (SELECT expenses.Id, expenses.Title, expenses.Amount,
-                  expenses.Category, expenses.Description,
-                  expenses.OwnerId, expenses.State,
-                  expenses.CreatedAt, expenses.UpdatedAt
-           FROM expenses
-           WHERE expenses.OwnerId = {[ownerId]})
-          (fn r rows => return (rowFromExpenses r :: rows))
-          []
+    rows <- query (SELECT expenses.Id, expenses.Title, expenses.Amount,
+                          expenses.Category, expenses.Description,
+                          expenses.OwnerId, expenses.State,
+                          expenses.CreatedAt, expenses.UpdatedAt
+                   FROM expenses
+                   WHERE expenses.OwnerId = {[ownerId]}
+                   ORDER BY expenses.Id DESC, expenses.CreatedAt DESC)
+                  (fn r acc => return (rowFromExpenses r :: acc))
+                  [];
+    return (List.rev rows)
 
 fun getByState state =
-    query (SELECT expenses.Id, expenses.Title, expenses.Amount,
-                  expenses.Category, expenses.Description,
-                  expenses.OwnerId, expenses.State,
-                  expenses.CreatedAt, expenses.UpdatedAt
-           FROM expenses
-           WHERE expenses.State = {[state]})
-          (fn r rows => return (rowFromExpenses r :: rows))
-          []
+    rows <- query (SELECT expenses.Id, expenses.Title, expenses.Amount,
+                          expenses.Category, expenses.Description,
+                          expenses.OwnerId, expenses.State,
+                          expenses.CreatedAt, expenses.UpdatedAt
+                   FROM expenses
+                   WHERE expenses.State = {[state]}
+                   ORDER BY expenses.Id DESC, expenses.CreatedAt DESC)
+                  (fn r acc => return (rowFromExpenses r :: acc))
+                  [];
+    return (List.rev rows)
 
 fun create data =
     id <- nextval expense_id_seq;

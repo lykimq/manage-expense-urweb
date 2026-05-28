@@ -15,7 +15,7 @@ fun expenseRow e =
 
 fun expenseRows exps =
     case exps of
-        [] => <xml><tr><td><span>No expenses to show.</span></td></tr></xml>
+        [] => <xml><tr><td colspan={7}><span>No expenses to show.</span></td></tr></xml>
       | _ => List.mapX expenseRow exps
 
 fun panel title tableRows =
