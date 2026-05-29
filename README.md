@@ -4,8 +4,8 @@ This project is a small expense approval workflow built with Ur/Web and PostgreS
 
 It is intentionally a demo, not a production expense system. The goal is to show
 where Ur/Web is strong: explicit workflow state, typed forms, typed SQL,
-server-side authorization, and simple transactional code that is still easy to
-reason about.
+server-side authorization, typed client-to-server RPC where it helps, and simple
+transactional code that is still easy to reason about.
 
 ## Why this is a good Ur/Web demo
 
@@ -17,6 +17,8 @@ rules:
 - invalid actions must be denied on the server
 - the database should reflect the same rules as the application
 - every change should leave an audit trail
+- the same server rules can run from a full form submit or from RPC, so the
+  browser does not need a separate client-side copy of those rules
 
 That makes it a good fit for Ur/Web. The app is not trying to impress with UI
 polish. It is trying to make the core business rules obvious.
@@ -30,18 +32,14 @@ polish. It is trying to make the core business rules obvious.
 - show a role-based home view and queue view
 - show one expense detail page with metadata and audit history
 - protect the main routes behind a signed session cookie
-- on create expense, optional **Check amount** demonstrates Ur/Web RPC: the
-  browser calls a server transaction from a button click, session and rules run
-  on the server, and the page updates without a full reload—useful early feedback
-  before submit, without writing to the database
+- optional **Check amount** on create expense (Ur/Web RPC; flow below)
 
 ## Demo walkthrough (quick)
 
 Use this quick flow to demo the app:
 
 1. login as Employee (`quyen_ly@example.com`)
-2. create a new expense (optional: **Check amount** for RPC validation feedback;
-   submit still re-validates on the server; new expense starts as `Submitted`)
+2. create a new expense (optional: **Check amount**); expense starts as `Submitted`
 3. logout, then login as Manager (`boss@example.com`)
 4. open the queue or detail page, then approve or reject
 5. logout, then login as Finance (`finance@example.com`)
@@ -80,7 +78,7 @@ This demo does not try to solve everything:
 - no receipt upload
 - no email notifications
 - no search, reporting, export, or admin tooling
-- no fancy frontend behavior
+- no rich SPA-style UI (forms and tables only)
 - no ownership rule yet on "employee can only open their own expense detail URL"
 - small JS helper (`src/static/bfcache.js`) is still needed for browser BFCache behavior
 
@@ -185,6 +183,17 @@ The "approve" path is intentionally simple:
 
 This is the core pattern used by reject and pay as well.
 
+## One request flow example: check amount (RPC)
+
+1. Employee types an amount and clicks **Check amount** (outside the submit form)
+2. the browser calls a server `transaction` via Ur/Web RPC
+3. the server applies session, role, and the same amount parse rule as create
+4. the server returns ok/message; the page shows a banner without a full reload
+5. **Submit for Approval** still runs the full create path (including validation)
+   before any database write
+
+Same rules as create; RPC is only early feedback, not a second source of truth.
+
 ## Quick start
 
 ```bash
@@ -245,7 +254,7 @@ This repo is most useful if you read it as a small case study:
 2. look at `src/auth/` for session and role checks
 3. look at `src/service/expense_service.ur` for the transaction boundaries
 4. compare `schema/tables.ur` with `schema/extra.sql`
-5. inspect `src/frontend/` last, after the rules are clear
+5. inspect `src/frontend/` last (create expense shows form submit and RPC)
 
 That order matches the point of the project: business rules first, UI second.
 
