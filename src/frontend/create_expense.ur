@@ -29,24 +29,53 @@ fun checkAmountClick amountSrc okSrc msgSrc () =
     set okSrc ok;
     set msgSrc msg
 
-fun renderForm amountSrc okSrc msgSrc r showRequiredMessage =
+fun validationBanner showRequiredMessage showInvalidAmountMessage =
+    if showRequiredMessage then
+        <xml>
+          <p role="form-validation-err">
+            <b>Please fill all required fields before continuing.</b>
+          </p>
+        </xml>
+    else if showInvalidAmountMessage then
+        <xml>
+          <p role="form-validation-err">
+            <b>Amount must be a valid number.</b>
+          </p>
+        </xml>
+    else
+        <xml/>
+
+fun amountCheckSection amountSrc okSrc msgSrc =
+    <xml>
+      <div>
+        <p>
+          <button value="Check amount"
+                  onclick={fn _ => checkAmountClick amountSrc okSrc msgSrc ()}/>
+        </p>
+        <dyn signal={amountCheckFeedbackBody okSrc msgSrc}/>
+        <p>
+          Demo: Check amount calls the server via Ur/Web RPC using the same
+          parser as submit, so you can confirm the value before sending the form.
+          Submit runs the same validation again on the server.
+        </p>
+      </div>
+    </xml>
+
+fun createExpenseHeader () =
     <xml>
       <header>
         <h1>Create Expense</h1>
         <p>Fields marked with * are required.</p>
       </header>
+    </xml>
 
+fun renderForm amountSrc okSrc msgSrc r showRequiredMessage showInvalidAmountMessage =
+    <xml>
+      {createExpenseHeader ()}
       <article>
         <h2>Expense Details</h2>
         <p>Fill in the fields below and submit for approval.</p>
-        {if showRequiredMessage then
-             <xml>
-               <p role="form-validation-err">
-                 <b>Please fill all required fields before continuing.</b>
-               </p>
-             </xml>
-         else
-             <xml/>}
+        {validationBanner showRequiredMessage showInvalidAmountMessage}
         <form>
           <table>
             <tr>
@@ -68,6 +97,12 @@ fun renderForm amountSrc okSrc msgSrc r showRequiredMessage =
                      <xml>
                        <span role="required-field-label">
                          <label>Amount * (required)</label>
+                       </span>
+                     </xml>
+                 else if showInvalidAmountMessage then
+                     <xml>
+                       <span role="invalid-amount-label">
+                         <label>Amount * (invalid)</label>
                        </span>
                      </xml>
                  else
@@ -99,18 +134,7 @@ fun renderForm amountSrc okSrc msgSrc r showRequiredMessage =
             <submit value="Submit for Approval" action={formAction}/>
           </p>
         </form>
-        <div>
-          <p>
-            <button value="Check amount"
-                    onclick={fn _ => checkAmountClick amountSrc okSrc msgSrc ()}/>
-          </p>
-          <dyn signal={amountCheckFeedbackBody okSrc msgSrc}/>
-          <p>
-            Demo: Check amount calls the server via Ur/Web RPC using the same
-            parser as submit, so you can confirm the value before sending the form.
-            Submit runs the same validation again on the server.
-          </p>
-        </div>
+        {amountCheckSection amountSrc okSrc msgSrc}
       </article>
     </xml>
 
@@ -121,19 +145,28 @@ and formAction r =
         amountSrc <- source r.Amount;
         okSrc <- source False;
         msgSrc <- source "";
-        Layout.wrap "Create Expense" (renderForm amountSrc okSrc msgSrc r True)
+        Layout.wrap "Create Expense" (renderForm amountSrc okSrc msgSrc r True False)
     else
-        expenseId <- Expense_service.create userId
-          {Title = r.Title,
-           Amount = r.Amount,
-           Category = r.Category,
-           Description = r.Description};
-        Log.info "create_expense" ("created expense_id=" ^ show expenseId);
-        redirect (bless "/Main/home")
+        case Expense_service.parseAmountValue r.Amount of
+            None =>
+            amountSrc <- source r.Amount;
+            okSrc <- source False;
+            msgSrc <- source "";
+            Layout.wrap "Create Expense"
+              (renderForm amountSrc okSrc msgSrc r False True)
+          | Some _ =>
+            expenseId <- Expense_service.create userId
+              {Title = r.Title,
+               Amount = r.Amount,
+               Category = r.Category,
+               Description = r.Description};
+            Log.info "create_expense" ("created expense_id=" ^ show expenseId);
+            redirect (bless "/Main/home")
 
 fun content amountSrc okSrc msgSrc =
     renderForm amountSrc okSrc msgSrc
       {Title = "", Amount = "", Category = "", Description = ""}
+      False
       False
 
 fun page () : transaction page =

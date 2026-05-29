@@ -139,6 +139,7 @@ main>article>form + div p[role="amount-check-err"] {
   border: 1px solid #fecaca;
 }
 
-main>article>form th [role="required-field-label"] label {
+main>article>form th [role="required-field-label"] label,
+main>article>form th [role="invalid-amount-label"] label {
   color: #b91c1c;
 }

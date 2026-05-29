@@ -30,8 +30,8 @@ fun managerForms expenseId =
         <p>
           <label>Decision</label>
           <radio{#Decision}>
-            <li><radioOption value="Approve"/> Approve</li>
-            <li><radioOption value="Reject"/> Reject</li>
+            <span><radioOption value="Approve"/> Approve</span>
+            <span><radioOption value="Reject"/> Reject</span>
           </radio>
         </p>
         <p>
