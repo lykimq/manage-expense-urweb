@@ -37,6 +37,17 @@ fun applyTransition userId expense expenseId newState comment =
 fun parseAmountValue s =
     read s : option float
 
+fun amountCheckResult amount =
+    case parseAmountValue amount of
+        None =>
+        (False, "Amount must be a valid number (same rule as on submit).")
+      | Some parsed =>
+        (True, "Valid amount: " ^ show parsed)
+
+fun checkAmount userId amount =
+    Policy.requireRole Roles.Employee userId;
+    return (amountCheckResult amount)
+
 fun parseAmount s =
     case parseAmountValue s of
         None => error <xml><p><b>Amount must be a valid number.</b></p></xml>

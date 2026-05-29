@@ -5,16 +5,10 @@ fun hasRequiredFields r =
     && r.Amount <> ""
     && r.Category <> ""
 
-(* RPC demo: same parse rule as Expense_service.create, without persisting. *)
+(* RPC demo: session + delegate to Expense_service.checkAmount. *)
 fun checkAmountRpc (amount : string) : transaction (bool * string) =
     userId <- Session.requireUser ();
-    Policy.requireRole Roles.Employee userId;
-    case Expense_service.parseAmountValue amount of
-        None =>
-        return (False,
-                "Amount must be a valid number (same rule as on submit).")
-      | Some parsed =>
-        return (True, "Valid amount: " ^ show parsed)
+    Expense_service.checkAmount userId amount
 
 fun amountCheckFeedbackBody okSrc msgSrc =
     ok <- signal okSrc;

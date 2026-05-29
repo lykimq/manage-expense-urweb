@@ -33,6 +33,8 @@ handler wiring. The tests focus on what still must be validated at runtime:
 - role authorization decisions
 - allowed and denied state transitions
 - audit side effects across service calls
+- server-side rules used by Ur/Web RPC (for example create-expense amount check
+  messages), without driving the browser
 
 This gives practical confidence while keeping the suite small and easy to run.
 
@@ -54,8 +56,12 @@ Logic tests:
 
 - `state_test`: state string mapping and parsing behavior
 - `transition_test`: transition truth table and invariants
-- `expense_service_amount_tests`: amount parsing acceptance/rejection
-- `create_expense_validation_tests`: required-field validation checks
+- `expense_service_amount_tests`: amount parsing (`parseAmountValue`) and the
+  `(ok, message)` pairs from `amountCheckResult` used by the create-expense
+  **Check amount** RPC (success and failure banner text only; not a second copy
+  of accept/reject cases)
+- `create_expense_validation_tests`: required-field checks on the create form
+  (`hasRequiredFields` in the frontend; separate from numeric amount parsing)
 - `policy_tests`: role matching and owner/non-owner checks via Policy module
 - `session_tests`: Session module checks (login, logout, cookie helpers)
 
@@ -74,13 +80,16 @@ HTTP checks:
 
 ## What this suite does not focus on
 
-- browser UI interaction testing
+- browser UI interaction testing (including clicking **Check amount** or exercising
+  the `rpc (...)` wire-up in `Create_expense`)
 - visual assertions
 - load/performance testing
 - distributed or multi-service testing
 
 For this demo project, that is intentional. The suite focuses on correctness of
-the workflow and service logic.
+the workflow and service logic. RPC is covered at the layer that matters for
+rules: `Expense_service.amountCheckResult` and related parsing, while session
+and role gates for that path are covered by `session_tests` and `policy_tests`.
 
 ## Run tests
 

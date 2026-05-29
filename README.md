@@ -30,13 +30,18 @@ polish. It is trying to make the core business rules obvious.
 - show a role-based home view and queue view
 - show one expense detail page with metadata and audit history
 - protect the main routes behind a signed session cookie
+- on create expense, optional **Check amount** demonstrates Ur/Web RPC: the
+  browser calls a server transaction from a button click, session and rules run
+  on the server, and the page updates without a full reload—useful early feedback
+  before submit, without writing to the database
 
 ## Demo walkthrough (quick)
 
 Use this quick flow to demo the app:
 
 1. login as Employee (`quyen_ly@example.com`)
-2. create a new expense (it starts as `Submitted`)
+2. create a new expense (optional: **Check amount** for RPC validation feedback;
+   submit still re-validates on the server; new expense starts as `Submitted`)
 3. logout, then login as Manager (`boss@example.com`)
 4. open the queue or detail page, then approve or reject
 5. logout, then login as Finance (`finance@example.com`)

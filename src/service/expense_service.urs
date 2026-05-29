@@ -12,6 +12,12 @@ val create : int -> expense_fields -> transaction int
 (* Shared amount parser used by create; None means invalid number input. *)
 val parseAmountValue : string -> option float
 
+(* RPC/create-expense: (ok, message) without persisting; uses parseAmountValue. *)
+val amountCheckResult : string -> bool * string
+
+(* Employee-only; same rule as amountCheckResult after role gate. *)
+val checkAmount : int -> string -> transaction (bool * string)
+
 (* Manager: Submitted -> Approved. *)
 val approve : int -> int -> string -> transaction unit
 

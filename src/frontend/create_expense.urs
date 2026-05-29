@@ -5,7 +5,7 @@ type expense_form = {Title : string, Amount : string, Category : string, Descrip
 (* Required fields check used before service call. *)
 val hasRequiredFields : expense_form -> bool
 
-(* RPC demo: parse amount on server without create (same rule as submit). *)
+(* RPC entry: session then Expense_service.checkAmount (same rule as submit). *)
 val checkAmountRpc : string -> transaction (bool * string)
 
 (* Form markup; role gate on GET is in main.ur (Employee). *)
