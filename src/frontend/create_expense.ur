@@ -5,21 +5,37 @@ fun hasRequiredFields r =
     && r.Amount <> ""
     && r.Category <> ""
 
-fun formAction r =
+(* RPC demo: same parse rule as Expense_service.create, without persisting. *)
+fun checkAmountRpc (amount : string) : transaction (bool * string) =
     userId <- Session.requireUser ();
     Policy.requireRole Roles.Employee userId;
-    if not (hasRequiredFields r) then
-        Layout.wrap "Create Expense" (renderForm r True)
-    else
-        expenseId <- Expense_service.create userId
-          {Title = r.Title,
-           Amount = r.Amount,
-           Category = r.Category,
-           Description = r.Description};
-        Log.info "create_expense" ("created expense_id=" ^ show expenseId);
-        redirect (bless "/Main/home")
+    case Expense_service.parseAmountValue amount of
+        None =>
+        return (False,
+                "Amount must be a valid number (same rule as on submit).")
+      | Some parsed =>
+        return (True, "Valid amount: " ^ show parsed)
 
-and renderForm r showRequiredMessage =
+fun amountCheckFeedbackBody okSrc msgSrc =
+    ok <- signal okSrc;
+    msg <- signal msgSrc;
+    return <xml>
+             {case msg of
+                  "" => <xml/>
+                | _ =>
+                  if ok then
+                      <xml><p role="amount-check-ok">{[msg]}</p></xml>
+                  else
+                      <xml><p role="amount-check-err">{[msg]}</p></xml>}
+           </xml>
+
+fun checkAmountClick amountSrc okSrc msgSrc () =
+    v <- get amountSrc;
+    (ok, msg) <- rpc (checkAmountRpc v);
+    set okSrc ok;
+    set msgSrc msg
+
+fun renderForm amountSrc okSrc msgSrc r showRequiredMessage =
     <xml>
       <header>
         <h1>Create Expense</h1>
@@ -31,7 +47,7 @@ and renderForm r showRequiredMessage =
         <p>Fill in the fields below and submit for approval.</p>
         {if showRequiredMessage then
              <xml>
-               <p style="color:#b91c1c; background:#fee2e2; border:1px solid #fecaca; border-radius:8px; padding:10px 12px;">
+               <p role="form-validation-err">
                  <b>Please fill all required fields before continuing.</b>
                </p>
              </xml>
@@ -42,7 +58,11 @@ and renderForm r showRequiredMessage =
             <tr>
               <th>
                 {if showRequiredMessage && r.Title = "" then
-                     <xml><label style="color:#b91c1c;">Title * (required)</label></xml>
+                     <xml>
+                       <span role="required-field-label">
+                         <label>Title * (required)</label>
+                       </span>
+                     </xml>
                  else
                      <xml><label>Title *</label></xml>}
               </th>
@@ -51,16 +71,26 @@ and renderForm r showRequiredMessage =
             <tr>
               <th>
                 {if showRequiredMessage && r.Amount = "" then
-                     <xml><label style="color:#b91c1c;">Amount * (required)</label></xml>
+                     <xml>
+                       <span role="required-field-label">
+                         <label>Amount * (required)</label>
+                       </span>
+                     </xml>
                  else
                      <xml><label>Amount *</label></xml>}
               </th>
-              <td><textbox{#Amount} value={r.Amount}/></td>
+              <td>
+                <textbox{#Amount} source={amountSrc} value={r.Amount}/>
+              </td>
             </tr>
             <tr>
               <th>
                 {if showRequiredMessage && r.Category = "" then
-                     <xml><label style="color:#b91c1c;">Category * (required)</label></xml>
+                     <xml>
+                       <span role="required-field-label">
+                         <label>Category * (required)</label>
+                       </span>
+                     </xml>
                  else
                      <xml><label>Category *</label></xml>}
               </th>
@@ -75,11 +105,45 @@ and renderForm r showRequiredMessage =
             <submit value="Submit for Approval" action={formAction}/>
           </p>
         </form>
+        <div>
+          <p>
+            <button value="Check amount"
+                    onclick={fn _ => checkAmountClick amountSrc okSrc msgSrc ()}/>
+          </p>
+          <dyn signal={amountCheckFeedbackBody okSrc msgSrc}/>
+          <p>
+            Demo: Check amount calls the server via Ur/Web RPC using the same
+            parser as submit, so you can confirm the value before sending the form.
+            Submit runs the same validation again on the server.
+          </p>
+        </div>
       </article>
     </xml>
 
-fun content () =
-    renderForm {Title = "", Amount = "", Category = "", Description = ""} False
+and formAction r =
+    userId <- Session.requireUser ();
+    Policy.requireRole Roles.Employee userId;
+    if not (hasRequiredFields r) then
+        amountSrc <- source r.Amount;
+        okSrc <- source False;
+        msgSrc <- source "";
+        Layout.wrap "Create Expense" (renderForm amountSrc okSrc msgSrc r True)
+    else
+        expenseId <- Expense_service.create userId
+          {Title = r.Title,
+           Amount = r.Amount,
+           Category = r.Category,
+           Description = r.Description};
+        Log.info "create_expense" ("created expense_id=" ^ show expenseId);
+        redirect (bless "/Main/home")
 
-fun page () =
-    Layout.wrap "Create Expense" (content ())
+fun content amountSrc okSrc msgSrc =
+    renderForm amountSrc okSrc msgSrc
+      {Title = "", Amount = "", Category = "", Description = ""}
+      False
+
+fun page () : transaction page =
+    amountSrc <- source "";
+    okSrc <- source False;
+    msgSrc <- source "";
+    Layout.wrap "Create Expense" (content amountSrc okSrc msgSrc)
