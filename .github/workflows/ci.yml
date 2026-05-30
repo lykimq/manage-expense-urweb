@@ -40,11 +40,6 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v16
 
-      - name: Cache Nix store
-        uses: DeterminateSystems/magic-nix-cache-action@v13
-        with:
-          use-flakehub: false
-
       - name: Install Ur/Web
         run: |
           # Pin nixpkgs: bare nixpkgs# resolves to flakehub weekly (gcc 15 + urweb 20200209).
