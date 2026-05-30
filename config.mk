@@ -11,7 +11,7 @@ URWEB    ?= urweb
 URWEB_CCOMPILER ?=
 URWEB_FLAGS :=
 ifneq ($(URWEB_CCOMPILER),)
-URWEB_FLAGS += -ccompiler $(URWEB_CCOMPILER)
+URWEB_FLAGS += -ccompiler '$(URWEB_CCOMPILER)'
 endif
 PSQL     ?= psql
 CREATEDB ?= createdb
