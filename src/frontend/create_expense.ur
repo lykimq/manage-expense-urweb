@@ -39,7 +39,7 @@ fun validationBanner showRequiredMessage showInvalidAmountMessage =
     else if showInvalidAmountMessage then
         <xml>
           <p role="form-validation-err">
-            <b>Amount must be a valid number.</b>
+            <b>Amount must be a positive number.</b>
           </p>
         </xml>
     else
@@ -147,14 +147,14 @@ and formAction r =
         msgSrc <- source "";
         Layout.wrap "Create Expense" (renderForm amountSrc okSrc msgSrc r True False)
     else
-        case Expense_service.parseAmountValue r.Amount of
-            None =>
+        case Expense_service.amountCheckResult r.Amount of
+            (False, _) =>
             amountSrc <- source r.Amount;
             okSrc <- source False;
             msgSrc <- source "";
             Layout.wrap "Create Expense"
               (renderForm amountSrc okSrc msgSrc r False True)
-          | Some _ =>
+          | (True, _) =>
             expenseId <- Expense_service.create userId
               {Title = r.Title,
                Amount = r.Amount,

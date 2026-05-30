@@ -37,21 +37,31 @@ fun applyTransition userId expense expenseId newState comment =
 fun parseAmountValue s =
     read s : option float
 
+fun validateAmount amount =
+    amount > 0.0
+
 fun amountCheckResult amount =
     case parseAmountValue amount of
         None =>
         (False, "Amount must be a valid number (same rule as on submit).")
       | Some parsed =>
-        (True, "Valid amount: " ^ show parsed)
-
-fun checkAmount userId amount =
-    Policy.requireRole Roles.Employee userId;
-    return (amountCheckResult amount)
+        if validateAmount parsed then
+            (True, "Valid amount: " ^ show parsed)
+        else
+            (False, "Amount must be greater than zero (same rule as on submit).")
 
 fun parseAmount s =
     case parseAmountValue s of
         None => error <xml><p><b>Amount must be a valid number.</b></p></xml>
-      | Some amount => return amount
+      | Some amount =>
+        if validateAmount amount then
+            return amount
+        else
+            error <xml><p><b>Amount must be greater than zero.</b></p></xml>
+
+fun checkAmount userId amount =
+    Policy.requireRole Roles.Employee userId;
+    return (amountCheckResult amount)
 
 fun create userId fields =
     Policy.requireRole Roles.Employee userId;

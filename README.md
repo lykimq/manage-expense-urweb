@@ -187,7 +187,8 @@ This is the core pattern used by reject and pay as well.
 
 1. Employee types an amount and clicks **Check amount** (outside the submit form)
 2. the browser calls a server `transaction` via Ur/Web RPC
-3. the server applies session, role, and the same amount parse rule as create
+3. the server applies session, role, and the same amount validation as create
+   (valid number, must be greater than zero)
 4. the server returns ok/message; the page shows a banner without a full reload
 5. **Submit for Approval** still runs the full create path (including validation)
    before any database write

@@ -12,6 +12,9 @@ val create : int -> expense_fields -> transaction int
 (* Shared amount parser used by create; None means invalid number input. *)
 val parseAmountValue : string -> option float
 
+(* Expense amounts must be strictly positive. *)
+val validateAmount : float -> bool
+
 (* RPC/create-expense: (ok, message) without persisting; uses parseAmountValue. *)
 val amountCheckResult : string -> bool * string
 

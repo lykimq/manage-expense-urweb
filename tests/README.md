@@ -55,7 +55,7 @@ Logic tests:
 - `state_test`: state string mapping and parsing behavior
 - `transition_test`: transition truth table and invariants
 - `expense_service_amount_tests`: `parseAmountValue` and `amountCheckResult`
-  banner messages (server side of create-expense **Check amount** RPC)
+  (valid number, amount must be > 0; server side of create-expense **Check amount** RPC)
 - `create_expense_validation_tests`: `hasRequiredFields` on the create form
 - `policy_tests`: role matching and owner/non-owner checks via Policy module
 - `session_tests`: Session module checks (login, logout, cookie helpers)
