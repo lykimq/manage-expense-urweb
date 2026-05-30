@@ -12,63 +12,57 @@ all: help
 
 help:
 	@echo "Targets:"
-	@echo "  make schema   Regenerate schema/schema.sql from tables.ur (commit after schema changes)"
-	@echo "  make db       Setup database (schema + constraints + seed)"
-	@echo "  make test-db      Setup dedicated test database"
-	@echo "  make web      Build and run dev server (auto rebuild app only)"
-	@echo "  make seed         Re-apply sample data (requires db)"
-	@echo "  make remove-db    Delete all app rows and reset sequences"
-	@echo "  make test         Run logic/integration + HTTP checks"
+	@echo "  make db             Setup database (schema + constraints + seed)"
+	@echo "  make test-db        Setup dedicated test database"
+	@echo "  make web            Build and run dev server (auto rebuild app only)"
+	@echo "  make seed           Re-apply sample data (requires db)"
+	@echo "  make remove-db      Delete all app rows and reset sequences"
+	@echo "  make test           Run logic/integration + HTTP checks"
 	@echo "  make clean-session  Drop the session signing key ($(SIG))"
-	@echo "  make clean        Remove build outputs and signing keys"
+	@echo "  make clean          Remove build outputs and signing keys (keeps $(SQL))"
 
-tests/test.exe: tests/test.urp $(APP_SRCS)
-	$(URWEB) $(URWEB_FLAGS) tests/test
-
-tests/http.exe: tests/http.urp $(APP_SRCS)
-	$(URWEB) $(URWEB_FLAGS) tests/http
+# --- Ur/Web builds ---
 
 $(EXE): $(URP) $(APP_SRCS)
 	$(URWEB) $(URWEB_FLAGS) $(PROJECT)
 
-# SQL only: stop before C codegen/link (make web still builds $(EXE) separately).
+tests/%.exe: tests/%.urp $(APP_SRCS)
+	$(URWEB) $(URWEB_FLAGS) tests/$*
+
 $(SQL): $(URP) $(APP_SRCS)
 	$(URWEB) $(URWEB_FLAGS) -stop sqlify -sql $(SQL) $(PROJECT)
 
 schema: $(SQL)
 	@echo "schema: wrote $(SQL)"
 
-db: $(SQL)
-	-$(CREATEDB) $(DB) 2>/dev/null || true
-	@if $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(SQL_TABLE)'" $(DB) | grep -q 1; then \
-		echo "db: tables already exist ($(DB))"; \
-	else \
-		echo "db: applying schema ($(DB))"; \
-		$(PSQL) -v ON_ERROR_STOP=1 -f $(SQL) $(DB); \
-	fi
-	@if [ -f "$(EXTRA_SQL)" ]; then \
-		$(PSQL) -v ON_ERROR_STOP=1 -f $(EXTRA_SQL) $(DB); \
-	fi
-	@if [ -f "$(SEED_SQL)" ]; then \
-		$(PSQL) -v ON_ERROR_STOP=1 -f $(SEED_SQL) $(DB); \
-	fi
-	@echo "db: ready ($(DB))"
+# --- Database helpers (used by db and test-db) ---
 
-test-db: $(SQL)
-	-$(CREATEDB) $(TEST_DB) 2>/dev/null || true
-	@if $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(TEST_SQL_TABLE)'" $(TEST_DB) | grep -q 1; then \
-		echo "test-db: tables already exist ($(TEST_DB))"; \
-	else \
-		echo "test-db: applying schema ($(TEST_DB))"; \
-		$(PSQL) -v ON_ERROR_STOP=1 -f $(SQL) $(TEST_DB); \
-	fi
-	@if [ -f "$(EXTRA_SQL)" ]; then \
-		$(PSQL) -v ON_ERROR_STOP=1 -f $(EXTRA_SQL) $(TEST_DB); \
-	fi
-	@if [ -f "$(SEED_SQL)" ]; then \
-		$(PSQL) -v ON_ERROR_STOP=1 -f $(SEED_SQL) $(TEST_DB); \
-	fi
-	@echo "test-db: ready ($(TEST_DB))"
+define require_sql
+@test -s '$(SQL)' || { echo "$(1): missing or empty $(SQL); run: make schema"; exit 1; }
+endef
+
+define setup_db
+-$(CREATEDB) $(2) 2>/dev/null || true
+@if $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(3)'" $(2) | grep -q 1; then \
+	echo "$(1): tables already exist ($(2))"; \
+else \
+	echo "$(1): applying schema ($(2))"; \
+	$(PSQL) -v ON_ERROR_STOP=1 -f $(SQL) $(2); \
+fi
+@for f in $(EXTRA_SQL) $(SEED_SQL); do \
+	[ -f "$$f" ] || continue; \
+	$(PSQL) -v ON_ERROR_STOP=1 -f "$$f" $(2); \
+done
+@echo "$(1): ready ($(2))"
+endef
+
+db: $(SQL)
+	$(call require_sql,db)
+	$(call setup_db,db,$(DB),$(SQL_TABLE))
+
+test-db:
+	$(call require_sql,test-db)
+	$(call setup_db,test-db,$(TEST_DB),$(TEST_SQL_TABLE))
 
 check-db:
 	@if ! $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(SQL_TABLE)'" $(DB) 2>/dev/null | grep -q 1; then \
@@ -124,4 +118,4 @@ clean-session:
 	@echo "clean-session: removed $(SIG); existing browser sessions are now invalid."
 
 clean:
-	rm -f $(EXE) tests/test.exe tests/http.exe $(SQL) $(SIG) test.sig
+	rm -f $(EXE) tests/test.exe tests/http.exe $(SIG) test.sig

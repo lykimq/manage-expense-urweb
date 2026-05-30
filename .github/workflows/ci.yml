@@ -80,11 +80,12 @@ jobs:
         run: |
           pg_isready -h localhost -U postgres -d postgres
           ccache -z
-          if [ "${{ steps.urweb-build-cache.outputs.cache-hit }}" = "true" ]; then \
-            echo "Ur/Web build cache hit."; \
-          else \
-            echo "Ur/Web build cache miss; compiling tests/test.exe and tests/http.exe in parallel."; \
-            echo "(schema/schema.sql is committed, so CI does not run urweb app for test-db.)"; \
+          if [ "${{ steps.urweb-build-cache.outputs.cache-hit }}" = "true" ]; then
+            echo "Ur/Web build cache hit; skipping compile."
+            touch tests/test.exe tests/http.exe
+          else
+            echo "Ur/Web build cache miss; compiling tests/test.exe and tests/http.exe in parallel (~5-10 min on a 2-vCPU runner)."
+            echo "test-db applies committed schema/schema.sql only (no urweb app sqlify)."
           fi
           make -j2 test URWEB_CCOMPILER='ccache gcc'
           ccache -s
