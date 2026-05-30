@@ -109,7 +109,7 @@ web: check-db $(EXE)
 		echo "Change detected. Rebuilding app..."; \
 	done
 
-# CI uses make -j3 test (test-db + both exes in parallel on a 2-vCPU runner).
+# CI: make schema test-db tests/test.exe tests/http.exe, then tests/run.sh.
 test: test-db $(TEST_EXE)
 	$(TEST_RUN)
 

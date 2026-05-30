@@ -249,8 +249,9 @@ See `tests/README.md` for details.
 
 ## CI
 
-GitHub Actions runs `make -j3 test` on push and pull requests to `main`. The workflow
-uses a PostgreSQL service container and installs Ur/Web from Nix (`nixpkgs#urweb`).
+GitHub Actions runs the test suite on push and pull requests to `main`. The workflow
+uses a PostgreSQL service container, installs Ur/Web from Nix (`nixpkgs#urweb`), and
+builds with urweb's default nix-wrapped compiler (no system gcc override).
 
 ## If you are learning Ur/Web
 

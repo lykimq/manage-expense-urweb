@@ -30,12 +30,10 @@ jobs:
       PGPORT: 5432
       PGUSER: postgres
       PGPASSWORD: postgres
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
-      CCACHE_MAXSIZE: 500M
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v16
@@ -46,52 +44,25 @@ jobs:
           use-flakehub: false
 
       - name: Install Ur/Web
-        id: urweb
         run: |
           store_path=$(nix build --print-out-paths --no-link 'nixpkgs#urweb')
           echo "${store_path}/bin" >> "$GITHUB_PATH"
-          echo "version=$(${store_path}/bin/urweb -numeric-version)" >> "$GITHUB_OUTPUT"
           ${store_path}/bin/urweb -version
 
       - name: Install runner dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client ripgrep ccache
-
-      - name: Restore ccache
-        uses: actions/cache@v4
-        with:
-          path: .ccache
-          key: ccache-${{ runner.os }}-uw${{ steps.urweb.outputs.version }}-${{ hashFiles('app.urp', 'tests/test.urp', 'tests/http.urp', 'config.mk', 'Makefile', 'schema/**', 'src/**', 'tests/**') }}
-          restore-keys: |
-            ccache-${{ runner.os }}-uw${{ steps.urweb.outputs.version }}-
-
-      - name: Restore Ur/Web build cache
-        uses: actions/cache@v4
-        id: urweb-build-cache
-        with:
-          path: |
-            tests/test.exe
-            tests/http.exe
-          key: urweb-build-${{ runner.os }}-uw${{ steps.urweb.outputs.version }}-${{ hashFiles('app.urp', 'tests/test.urp', 'tests/http.urp', 'config.mk', 'Makefile', 'schema/**', 'src/**', 'tests/**') }}
-          restore-keys: |
-            urweb-build-${{ runner.os }}-uw${{ steps.urweb.outputs.version }}-
+          sudo apt-get install -y postgresql-client ripgrep
 
       - name: Run tests
         run: |
           pg_isready -h localhost -U postgres -d postgres
           start=$(date +%s)
-          if [ "${{ steps.urweb-build-cache.outputs.cache-hit }}" = "true" ]; then
-            echo "Ur/Web build cache hit; expect ~1-2 min (test-db + run tests only)."
-            touch tests/test.exe tests/http.exe
+          timeout 600 bash -c '
+            set -euo pipefail
+            make schema
             make test-db
+            make tests/test.exe tests/http.exe
             bash tests/run.sh
-          else
-            echo "Ur/Web build cache miss; compiling sequentially (~7-10 min on 2-vCPU runner)."
-            make test-db
-            make tests/test.exe URWEB_CCOMPILER='ccache gcc'
-            make tests/http.exe URWEB_CCOMPILER='ccache gcc'
-            bash tests/run.sh
-          fi
+          '
           echo "Run tests step: $(( $(date +%s) - start ))s"
-          ccache -s
