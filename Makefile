@@ -3,47 +3,41 @@ include config.mk
 URP := $(PROJECT).urp
 EXE := $(PROJECT).exe
 URL := http://localhost:$(PORT)/Main/login
-TEST_PORT ?= 18081
-TEST_URL := http://localhost:$(TEST_PORT)/Main/login
-TEST_SUITE_PROJECT := tests/test
-TEST_SUITE_URP := $(TEST_SUITE_PROJECT).urp
-TEST_SUITE_EXE := $(TEST_SUITE_PROJECT).exe
-TEST_SUITE_PORT ?= 18082
-TEST_SUITE_URL := http://localhost:$(TEST_SUITE_PORT)/Test_main/main
-HTTP_TEST_PROJECT := tests/http
-HTTP_TEST_URP := $(HTTP_TEST_PROJECT).urp
-HTTP_TEST_EXE := $(HTTP_TEST_PROJECT).exe
-HTTP_TEST_PORT ?= 18083
-HTTP_TEST_BASE_URL := http://localhost:$(HTTP_TEST_PORT)
+TEST_EXE := tests/test.exe tests/http.exe
+TEST_RUN := bash tests/run.sh
 
-.PHONY: all help web test db seed remove-db check-db clean-session clean
+.PHONY: all help web test schema db seed remove-db check-db clean-session clean test-db
 
 all: help
 
 help:
 	@echo "Targets:"
+	@echo "  make schema   Regenerate schema/schema.sql from tables.ur (commit after schema changes)"
 	@echo "  make db       Setup database (schema + constraints + seed)"
 	@echo "  make test-db      Setup dedicated test database"
 	@echo "  make web      Build and run dev server (auto rebuild app only)"
 	@echo "  make seed         Re-apply sample data (requires db)"
 	@echo "  make remove-db    Delete all app rows and reset sequences"
-	@echo "  make test         Run full suite + HTTP integration checks"
+	@echo "  make test         Run logic/integration + HTTP checks"
 	@echo "  make clean-session  Drop the session signing key ($(SIG))"
-	@echo "  make clean        Remove app.exe, generated SQL, and $(SIG)"
+	@echo "  make clean        Remove build outputs and signing keys"
 
-$(TEST_SUITE_EXE): $(TEST_SUITE_URP) $(APP_SRCS)
-	$(URWEB) $(TEST_SUITE_PROJECT)
+tests/test.exe: tests/test.urp $(APP_SRCS)
+	$(URWEB) $(URWEB_FLAGS) tests/test
 
-$(HTTP_TEST_EXE): $(HTTP_TEST_URP) $(APP_SRCS)
-	$(URWEB) $(HTTP_TEST_PROJECT)
+tests/http.exe: tests/http.urp $(APP_SRCS)
+	$(URWEB) $(URWEB_FLAGS) tests/http
 
 $(EXE): $(URP) $(APP_SRCS)
-	$(URWEB) $(PROJECT)
+	$(URWEB) $(URWEB_FLAGS) $(PROJECT)
 
+# SQL only: stop before C codegen/link (make web still builds $(EXE) separately).
 $(SQL): $(URP) $(APP_SRCS)
-	$(URWEB) $(PROJECT)
+	$(URWEB) $(URWEB_FLAGS) -stop sqlify -sql $(SQL) $(PROJECT)
 
-# One-time database setup: generate schema, apply tables, constraints, seed.
+schema: $(SQL)
+	@echo "schema: wrote $(SQL)"
+
 db: $(SQL)
 	-$(CREATEDB) $(DB) 2>/dev/null || true
 	@if $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(SQL_TABLE)'" $(DB) | grep -q 1; then \
@@ -60,7 +54,6 @@ db: $(SQL)
 	fi
 	@echo "db: ready ($(DB))"
 
-# One-time test database setup: dedicated DB for integration tests.
 test-db: $(SQL)
 	-$(CREATEDB) $(TEST_DB) 2>/dev/null || true
 	@if $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(TEST_SQL_TABLE)'" $(TEST_DB) | grep -q 1; then \
@@ -77,7 +70,6 @@ test-db: $(SQL)
 	fi
 	@echo "test-db: ready ($(TEST_DB))"
 
-# Lightweight check used by web/test; does not modify the database.
 check-db:
 	@if ! $(PSQL) -tAc "SELECT 1 FROM information_schema.tables WHERE table_name = '$(SQL_TABLE)'" $(DB) 2>/dev/null | grep -q 1; then \
 		echo "db: not ready. Run 'make db' first."; \
@@ -123,55 +115,13 @@ web: check-db $(EXE)
 		echo "Change detected. Rebuilding app..."; \
 	done
 
-test: test-db $(TEST_SUITE_EXE) $(HTTP_TEST_EXE)
-	@if ss -ltn "( sport = :$(TEST_SUITE_PORT) )" | tail -n +2 | grep -q .; then \
-		echo "test-suite: port $(TEST_SUITE_PORT) is already in use. Override with TEST_SUITE_PORT=<port>."; \
-		exit 1; \
-	fi
-	@./$(TEST_SUITE_EXE) -p $(TEST_SUITE_PORT) & \
-	pid=$$!; \
-	sleep 1; \
-	if ! kill -0 $$pid 2>/dev/null; then \
-		echo "test-suite: app failed to start on port $(TEST_SUITE_PORT)."; \
-		wait $$pid 2>/dev/null || true; \
-		exit 1; \
-	fi; \
-	body=$$(curl -sf $(TEST_SUITE_URL)); \
-	decoded=$$(printf '%s\n' "$$body" | sed 's/&#10;/\n/g'); \
-	printf '%s\n' "$$decoded" | grep -oE '^(TEST|SUMMARY|RESULT).*' || true; \
-	if printf '%s\n' "$$body" | grep -q 'ALL_TESTS_PASSED'; then \
-		echo "test-suite: ok ($(TEST_SUITE_URL))"; \
-		rc=0; \
-	else \
-		echo "test-suite: failed ($(TEST_SUITE_URL))"; \
-		rc=1; \
-	fi; \
-	kill $$pid 2>/dev/null || true; \
-	wait $$pid 2>/dev/null || true; \
-	if [ $$rc -ne 0 ]; then \
-		exit $$rc; \
-	fi; \
-	if ss -ltn "( sport = :$(HTTP_TEST_PORT) )" | tail -n +2 | grep -q .; then \
-		echo "http-checks: port $(HTTP_TEST_PORT) is already in use. Override with HTTP_TEST_PORT=<port>."; \
-		exit 1; \
-	fi; \
-	./$(HTTP_TEST_EXE) -p $(HTTP_TEST_PORT) & \
-	pid=$$!; \
-	sleep 1; \
-	if ! kill -0 $$pid 2>/dev/null; then \
-		echo "http-checks: app failed to start on port $(HTTP_TEST_PORT)."; \
-		wait $$pid 2>/dev/null || true; \
-		exit 1; \
-	fi; \
-	bash tests/http_checks.sh "$(HTTP_TEST_BASE_URL)"; \
-	rc=$$?; \
-	kill $$pid 2>/dev/null || true; \
-	wait $$pid 2>/dev/null || true; \
-	exit $$rc
+# Use make -j2 test in CI so tests/test.exe and tests/http.exe build in parallel.
+test: test-db $(TEST_EXE)
+	$(TEST_RUN)
 
 clean-session:
 	rm -f $(SIG)
 	@echo "clean-session: removed $(SIG); existing browser sessions are now invalid."
 
 clean:
-	rm -f $(EXE) $(TEST_SUITE_EXE) $(HTTP_TEST_EXE) $(SQL) $(SIG) test.sig
+	rm -f $(EXE) tests/test.exe tests/http.exe $(SQL) $(SIG) test.sig

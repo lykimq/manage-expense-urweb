@@ -249,7 +249,7 @@ See `tests/README.md` for details.
 
 ## CI
 
-GitHub Actions runs `make test` on push and pull requests to `main`. The workflow
+GitHub Actions runs `make -j2 test` on push and pull requests to `main`. The workflow
 uses a PostgreSQL service container and installs Ur/Web from Nix (`nixpkgs#urweb`).
 
 ## If you are learning Ur/Web

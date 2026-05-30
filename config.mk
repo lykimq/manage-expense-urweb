@@ -7,6 +7,12 @@ TEST_DB  := expense_test_db
 
 # Tool commands (override on the command line: make URWEB=/path/to/urweb web)
 URWEB    ?= urweb
+# Optional: make URWEB_CCOMPILER='ccache gcc' test  (CI sets this for faster C compiles)
+URWEB_CCOMPILER ?=
+URWEB_FLAGS :=
+ifneq ($(URWEB_CCOMPILER),)
+URWEB_FLAGS += -ccompiler $(URWEB_CCOMPILER)
+endif
 PSQL     ?= psql
 CREATEDB ?= createdb
 

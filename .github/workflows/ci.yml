@@ -29,6 +29,8 @@ jobs:
       PGPORT: 5432
       PGUSER: postgres
       PGPASSWORD: postgres
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 500M
 
     steps:
       - name: Checkout
@@ -41,21 +43,45 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v13
 
       - name: Install Ur/Web
-        run: nix profile install nixpkgs#urweb
-
-      - name: Add Ur/Web to PATH
-        run: echo "$HOME/.nix-profile/bin" >> "$GITHUB_PATH"
+        id: urweb
+        run: |
+          store_path=$(nix build --print-out-paths --no-link 'nixpkgs#urweb')
+          echo "${store_path}/bin" >> "$GITHUB_PATH"
+          echo "version=$(${store_path}/bin/urweb -numeric-version)" >> "$GITHUB_OUTPUT"
+          ${store_path}/bin/urweb -version
 
       - name: Install runner dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client ripgrep
+          sudo apt-get install -y postgresql-client ripgrep ccache
 
-      - name: Toolchain versions
-        run: |
-          urweb -version
-          psql --version
-          rg --version
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-${{ runner.os }}-uw${{ steps.urweb.outputs.version }}-${{ hashFiles('app.urp', 'tests/test.urp', 'tests/http.urp', 'config.mk', 'Makefile', 'schema/**', 'src/**', 'tests/**') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-uw${{ steps.urweb.outputs.version }}-
+
+      - name: Restore Ur/Web build cache
+        uses: actions/cache@v4
+        id: urweb-build-cache
+        with:
+          path: |
+            tests/test.exe
+            tests/http.exe
+          key: urweb-build-${{ runner.os }}-uw${{ steps.urweb.outputs.version }}-${{ hashFiles('app.urp', 'tests/test.urp', 'tests/http.urp', 'config.mk', 'Makefile', 'schema/**', 'src/**', 'tests/**') }}
+          restore-keys: |
+            urweb-build-${{ runner.os }}-uw${{ steps.urweb.outputs.version }}-
 
       - name: Run tests
-        run: make test
+        run: |
+          ccache -z
+          if [ "${{ steps.urweb-build-cache.outputs.cache-hit }}" = "true" ]; then \
+            echo "Ur/Web build cache hit."; \
+          else \
+            echo "Ur/Web build cache miss; compiling tests/test.exe and tests/http.exe in parallel."; \
+            echo "(schema/schema.sql is committed, so CI does not run urweb app for test-db.)"; \
+          fi
+          make -j2 test URWEB_CCOMPILER='ccache gcc'
+          ccache -s
