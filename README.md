@@ -247,6 +247,11 @@ effects in the database, and key HTTP auth/redirect behavior.
 
 See `tests/README.md` for details.
 
+## CI
+
+GitHub Actions runs `make test` on push and pull requests to `main`. The workflow
+uses a PostgreSQL service container and installs Ur/Web from Nix (`nixpkgs#urweb`).
+
 ## If you are learning Ur/Web
 
 This repo is most useful if you read it as a small case study:
