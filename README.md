@@ -245,13 +245,8 @@ This is intentionally not a browser automation setup. For this demo, tests focus
 on business correctness, authorization rules, state transitions, transactional
 effects in the database, and key HTTP auth/redirect behavior.
 
-See `tests/README.md` for details.
-
-## CI
-
-GitHub Actions runs `make test` on push and pull requests to `main`. The workflow
-uses a PostgreSQL service container, installs Ur/Web from Nix (`nixpkgs#urweb`), and
-builds with urweb's default nix-wrapped compiler (no system gcc override).
+See `tests/README.md` for details. GitHub Actions runs the same suite on push and
+pull requests to `main`.
 
 ## If you are learning Ur/Web
 
