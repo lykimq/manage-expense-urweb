@@ -7,6 +7,7 @@ test.sig
 *.o
 *.c
 *.js
+!src/static/bfcache.js
 
 # Generated SQL (regenerate with: make schema)
 schema/schema.sql
