@@ -1,6 +1,8 @@
+(* Unit tests for expense state names: show, fromString, and bad input. *)
+
 val groupName = "state"
 
-(* show law: each constructor stringifies to its constructor name. *)
+(* Each state name should print exactly as stored in the database. *)
 val showSubmittedString =
     Test_harness.mkResult "show renders Submitted as Submitted"
         (show State.Submitted = "Submitted")
@@ -17,7 +19,7 @@ val showPaidString =
     Test_harness.mkResult "show renders Paid as Paid"
         (show State.Paid = "Paid")
 
-(* SQL storage relies on each state having a distinct string form. *)
+(* Every state needs a different string so the database can tell them apart. *)
 val showStringsAreUnique =
     Test_harness.mkResult "all state strings are unique"
         (show State.Submitted <> show State.Approved
@@ -27,7 +29,7 @@ val showStringsAreUnique =
          && show State.Approved <> show State.Paid
          && show State.Rejected <> show State.Paid)
 
-(* Round-trip law: fromString (show s) = Some s for every constructor. *)
+(* Converting to text and back should give the same state. *)
 val roundTripSubmitted =
     Test_harness.mkResult "fromString round trip works for Submitted"
         (case State.fromString (show State.Submitted) of
@@ -52,7 +54,7 @@ val roundTripPaid =
              Some State.Paid => True
            | _ => False)
 
-(* Negative parses: unknown labels yield None. *)
+(* Random or unknown text should not parse as a state. *)
 val invalidStringReturnsNone =
     Test_harness.mkResult "invalid state string returns None"
         (case State.fromString "NotAState" of
@@ -65,7 +67,7 @@ val emptyStringReturnsNone =
              None => True
            | _ => False)
 
-(* Case sensitivity: only the exact constructor names are accepted. *)
+(* Only exact names like Submitted work; lowercase or ALL CAPS do not. *)
 val lowercaseRejected =
     Test_harness.mkResult "lowercase state string is rejected"
         (case State.fromString "submitted" of
@@ -78,7 +80,7 @@ val uppercaseRejected =
              None => True
            | _ => False)
 
-(* Whitespace sensitivity: surrounding spaces are not trimmed. *)
+(* Extra spaces before or after the name should be rejected. *)
 val leadingWhitespaceRejected =
     Test_harness.mkResult "leading whitespace in state string is rejected"
         (case State.fromString " Submitted" of
@@ -91,7 +93,7 @@ val trailingWhitespaceRejected =
              None => True
            | _ => False)
 
-(* Partial overlap: prefixes and suffixes must not be accepted. *)
+(* Partial names like Sub or SubmittedX should not parse. *)
 val prefixOnlyRejected =
     Test_harness.mkResult "state string prefix alone is rejected"
         (case State.fromString "Sub" of

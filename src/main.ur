@@ -1,3 +1,5 @@
+(* Top-level page handlers wired to URLs in app.urp. *)
+
 fun login () =
     Log.info "main" "GET /Main/login";
     Login.page ()

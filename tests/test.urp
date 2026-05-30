@@ -27,9 +27,9 @@ logic/state_test
 logic/transition_test
 logic/expense_service_amount_tests
 logic/create_expense_validation_tests
-logic/policy_tests
-logic/session_tests
 integration/test_data_utils
+integration/policy_tests
+integration/session_tests
 integration/expense_service_tests
 integration/dashboard_service_tests
 integration/detail_service_tests

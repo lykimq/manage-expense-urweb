@@ -1,6 +1,8 @@
+(* Unit tests for which actions are allowed in each expense stage. *)
+
 val groupName = "transition"
 
-(* canApprove truth table: only Submitted is allowed. *)
+(* Only Submitted expenses can be approved. *)
 val canApproveSubmittedTrue =
     Test_harness.mkResult "canApprove allows Submitted"
         (Transition.canApprove State.Submitted)
@@ -17,7 +19,7 @@ val canApprovePaidFalse =
     Test_harness.mkResult "canApprove rejects Paid"
         (not (Transition.canApprove State.Paid))
 
-(* canReject truth table: only Submitted is allowed. *)
+(* Only Submitted expenses can be rejected. *)
 val canRejectSubmittedTrue =
     Test_harness.mkResult "canReject allows Submitted"
         (Transition.canReject State.Submitted)
@@ -34,7 +36,7 @@ val canRejectPaidFalse =
     Test_harness.mkResult "canReject rejects Paid"
         (not (Transition.canReject State.Paid))
 
-(* canPay truth table: only Approved is allowed. *)
+(* Only Approved expenses can be paid. *)
 val canPaySubmittedFalse =
     Test_harness.mkResult "canPay rejects Submitted"
         (not (Transition.canPay State.Submitted))
@@ -51,7 +53,7 @@ val canPayPaidFalse =
     Test_harness.mkResult "canPay rejects Paid"
         (not (Transition.canPay State.Paid))
 
-(* Invariant: Rejected and Paid are terminal states (no action is allowed). *)
+(* Rejected and Paid expenses cannot move again. *)
 fun isTerminal (s : State.expense_state) : bool =
     not (Transition.canApprove s)
     && not (Transition.canReject s)
@@ -65,7 +67,7 @@ val paidIsTerminal =
     Test_harness.mkResult "Paid is a terminal state"
         (isTerminal State.Paid)
 
-(* Invariant: canApprove and canReject share the same source state. *)
+(* Approve and reject are allowed in the same stage. *)
 fun reviewActionsAlign (s : State.expense_state) : bool =
     Transition.canApprove s = Transition.canReject s
 
@@ -76,7 +78,7 @@ val approveRejectShareSource =
          && reviewActionsAlign State.Rejected
          && reviewActionsAlign State.Paid)
 
-(* Invariant: payment is mutually exclusive with manager review actions. *)
+(* Pay cannot happen at the same time as approve or reject. *)
 fun payMutexWithReview (s : State.expense_state) : bool =
     if Transition.canPay s then
         not (Transition.canApprove s) && not (Transition.canReject s)
@@ -90,7 +92,7 @@ val payMutex =
          && payMutexWithReview State.Rejected
          && payMutexWithReview State.Paid)
 
-(* Invariant: number of allowed actions matches the workflow shape. *)
+(* Count how many actions are allowed in this stage. *)
 fun actionCount (s : State.expense_state) : int =
     (if Transition.canApprove s then 1 else 0)
     + (if Transition.canReject s then 1 else 0)

@@ -1,5 +1,8 @@
+(* Integration tests for role checks and no-self-approval rules against seeded users. *)
+
 val groupName = "policy"
 
+(* Exercise requireRole and requireNotOwner with real database users. *)
 fun runAll () : transaction (list Test_harness.test_result) =
     _ <- Policy.requireRole Roles.Employee 1;
     _ <- Policy.requireRole Roles.Manager 2;

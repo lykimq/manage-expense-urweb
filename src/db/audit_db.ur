@@ -1,3 +1,5 @@
+(* Save and look up the history of changes to each expense. *)
+
 open Tables
 
 type audit_entry =

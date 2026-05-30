@@ -1,5 +1,8 @@
+(* Helpers to set up and clean up test data in the database. *)
+
 open Tables
 
+(* Delete audit rows and the expense row after an integration test. *)
 fun cleanupExpense expenseId =
     dml (DELETE FROM audit_log WHERE ExpenseId = {[expenseId]});
     dml (DELETE FROM expenses WHERE Id = {[expenseId]})

@@ -1,3 +1,5 @@
+(* Runs all test groups and prints a combined pass/fail report page. *)
+
 fun main () : transaction page =
     expenseServiceResults <- Expense_service_tests.runAll ();
     dashboardServiceResults <- Dashboard_service_tests.runAll ();

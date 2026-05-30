@@ -24,13 +24,13 @@ help:
 # --- Ur/Web builds ---
 
 $(EXE): $(URP) $(APP_SRCS)
-	$(URWEB) $(URWEB_FLAGS) $(PROJECT)
+	$(URWEB) $(PROJECT)
 
-tests/%.exe: tests/%.urp $(APP_SRCS)
-	$(URWEB) $(URWEB_FLAGS) tests/$*
+tests/%.exe: tests/%.urp $(APP_SRCS) $(TEST_SRCS)
+	$(URWEB) tests/$*
 
 $(SQL): $(URP) $(APP_SRCS)
-	$(URWEB) $(URWEB_FLAGS) -stop sqlify -sql $(SQL) $(PROJECT)
+	$(URWEB) -stop sqlify -sql $(SQL) $(PROJECT)
 
 schema: $(SQL)
 	@echo "schema: wrote $(SQL)"

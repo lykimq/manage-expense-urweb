@@ -1,3 +1,5 @@
+(* The three user types in this app and helpers to read and write them as text. *)
+
 datatype role = Employee | Manager | Finance
 
 fun toString r =

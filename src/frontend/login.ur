@@ -1,3 +1,5 @@
+(* Show the login form and handle sign-in by email. *)
+
 fun renderLogin errorMessageOpt =
     Layout.wrapNoNav "Login"
       <xml>

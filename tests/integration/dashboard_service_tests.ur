@@ -1,3 +1,5 @@
+(* Integration tests for role-specific dashboard and approval queue lists. *)
+
 open Tables
 
 val groupName = "dashboard_service"
@@ -10,6 +12,7 @@ fun loadWorkspace req =
 fun loadQueueWorkspace req =
     Dashboard_service.loadQueueWorkspace req.Role req.UserId
 
+(* Seed expenses, load each role view, then check titles and filtered rows. *)
 fun runAll () : transaction (list Test_harness.test_result) =
     submittedId <- Expense_service.create 1
                    {Title = "Dashboard submitted expense",

@@ -1,4 +1,4 @@
-(* Wraps server-side error bodies in the same shell and red text as login flash errors. *)
+(* Simple error page with a message and a link back to home. *)
 
 fun err body =
     Layout.wrapNoNav "Error"

@@ -1,3 +1,5 @@
+(* Read user records from the database. *)
+
 open Tables
 
 type user = {Id : int, FullName : string, Role : string, Email : string}

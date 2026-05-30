@@ -1,4 +1,4 @@
-(* Server console logging with a fixed level + component prefix. *)
+(* Write messages to the server log with a level and a module name. *)
 
 fun write level component message =
     debug (level ^ " [" ^ component ^ "] " ^ message)

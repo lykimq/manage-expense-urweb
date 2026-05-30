@@ -1,3 +1,5 @@
+(* Read and write expense records in the database. *)
+
 open Tables
 
 type expense =

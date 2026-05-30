@@ -1,3 +1,5 @@
+(* The read-only parts of the detail page: expense fields and change history. *)
+
 fun showStateLabel state =
     if state = "" then
         "(none)"

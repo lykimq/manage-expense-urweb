@@ -1,3 +1,5 @@
+(* Decide whether approve, reject, or pay is allowed in the current stage. *)
+
 fun canApprove st =
     case st of
         State.Submitted => True

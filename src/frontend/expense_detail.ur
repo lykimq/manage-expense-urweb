@@ -1,4 +1,4 @@
-(* Expense detail page entry: compose view + actions. *)
+(* Single expense page: loads data, shows details, and shows action buttons. *)
 
 fun page expenseId =
     userId <- Session.requireUser ();

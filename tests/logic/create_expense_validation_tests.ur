@@ -1,3 +1,5 @@
+(* Unit tests for required fields on the create expense form. *)
+
 val groupName = "create_expense_validation"
 
 val validFieldsAccepted =

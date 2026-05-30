@@ -1,12 +1,14 @@
+(* Tracks who is logged in using cookies, and helpers to sign in, sign out, or block access. *)
+
 open Tables
 
-(* Signed-in user id. *)
+(* Cookie that stores the logged-in user's id. *)
 cookie user_session : {UserId : int}
 
-(* One-shot login error message after a failed sign-in redirect. *)
+(* Cookie used to show a login error once, then clear it. *)
 cookie login_error : string
 
-(* Tell the browser not to cache the page (avoids stale UI on Back). *)
+(* Send headers so the browser does not show a cached copy of the page. *)
 fun setNoCacheHeaders () =
     setHeader (blessResponseHeader "Cache-Control") "no-store, no-cache, must-revalidate, max-age=0";
     setHeader (blessResponseHeader "Pragma") "no-cache";
@@ -18,7 +20,7 @@ fun login userId =
                             Expires = None,
                             Secure = False}
 
-(* Drop session and any flash error. *)
+(* Sign out: clear the session and any login error message. *)
 fun logout () =
     Log.info "session" "logout";
     clearCookie user_session;
@@ -44,7 +46,7 @@ fun currentUserInfo () =
                                     Email = row.Users.Email}
                 | None => None)
 
-(* Must be logged in; otherwise redirect to login. Returns user id. *)
+(* Require a logged-in user; send them to the login page if not. *)
 fun requireUser () =
     currentUserOpt <- currentUser ();
     case currentUserOpt of
@@ -53,7 +55,7 @@ fun requireUser () =
          redirect (bless "/Main/login"))
       | Some id => return id
 
-(* Like requireUser, but returns name, role, and email from the DB. *)
+(* Same as requireUser, but also loads name, role, and email. *)
 fun requireUserInfo () =
     userInfoOpt <- currentUserInfo ();
     case userInfoOpt of
@@ -62,7 +64,7 @@ fun requireUserInfo () =
          redirect (bless "/Main/login"))
       | Some info => return info
 
-(* Login page only; redirect to home if already signed in. *)
+(* For the login page only: send already-logged-in users to home. *)
 fun requireGuest () =
     currentUserOpt <- currentUser ();
     case currentUserOpt of
@@ -87,7 +89,7 @@ fun loginByEmail email =
                                 Secure = False};
          return False)
 
-(* Read login_error once, then clear it. *)
+(* Read the one-time login error message, then delete it. *)
 fun consumeLoginError () =
     errorMessageOpt <- getCookie login_error;
     clearCookie login_error;

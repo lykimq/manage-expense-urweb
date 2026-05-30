@@ -1,3 +1,5 @@
+(* Pick which expenses to show on the home page and approval queue, based on role. *)
+
 fun panelTitle role =
     case role of
         Roles.Employee => "My Expenses"

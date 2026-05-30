@@ -1,5 +1,8 @@
+(* Integration tests for login, logout, session cookies, and login error flash. *)
+
 val groupName = "session"
 
+(* Walk through a full login and logout flow, including a failed login. *)
 fun runAll () : transaction (list Test_harness.test_result) =
     Session.logout ();
     currentNone <- Session.currentUser ();

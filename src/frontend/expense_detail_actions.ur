@@ -1,3 +1,5 @@
+(* Approve/reject form for managers and Mark paid button for finance. *)
+
 fun detailUrl expenseId =
     bless ("/Main/detail/" ^ show expenseId)
 

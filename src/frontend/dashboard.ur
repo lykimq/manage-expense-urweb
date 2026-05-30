@@ -1,4 +1,4 @@
-(* Dashboard markup only; data from Dashboard_service. *)
+(* HTML for the expense table and role-specific links; data comes from Dashboard_service. *)
 
 fun expenseRow e =
     <xml>

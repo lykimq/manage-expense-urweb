@@ -1,3 +1,5 @@
+(* Shared helpers to build, format, and summarize test results. *)
+
 type test_result =
     {Description : string,
      Passed : bool}

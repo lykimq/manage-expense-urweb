@@ -1,3 +1,5 @@
+(* Page where managers and finance review expenses waiting for action. *)
+
 fun queueRow e =
     <xml>
       <tr>

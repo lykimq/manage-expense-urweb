@@ -1,4 +1,4 @@
-(* Page shell: head, CSS, main content, optional nav. *)
+(* Shared page wrapper: title, CSS, main content, and optional nav bar. *)
 
 fun headContent ttl =
     <xml>
@@ -13,7 +13,7 @@ fun headContent ttl =
       </head>
     </xml>
 
-(* Empty onload marks the page client-side so app.urp script tags (e.g. bfcache.js) load. *)
+(* The empty onload hook tells Ur/Web this is a full page so client scripts can run. *)
 fun wrapNoNav ttl content =
     Session.setNoCacheHeaders ();
     return <xml>
@@ -25,7 +25,7 @@ fun wrapNoNav ttl content =
       </body>
     </xml>
 
-(* Logged-in shell with logout. *)
+(* Same wrapper as wrapNoNav, but adds a Logout link for signed-in pages. *)
 fun wrap ttl content =
     Session.setNoCacheHeaders ();
     return <xml>

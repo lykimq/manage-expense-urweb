@@ -1,3 +1,5 @@
+(* Checks who is allowed to do what: right role, and no approving your own expense. *)
+
 open Tables
 
 fun roleForUser userId =
@@ -33,7 +35,7 @@ fun rejectRole userId actualRole expectedRole =
         ^ ", need " ^ show expectedRole);
      error <xml><p><b>You are not allowed to perform this action.</b></p></xml>)
 
-(* Abort unless the user exists and users.Role equals expectedRole. *)
+(* Stop with an error unless this user exists and has the required role. *)
 fun requireRole expectedRole userId =
     roleRowOpt <- roleForUser userId;
     case roleRowOpt of
@@ -53,7 +55,7 @@ fun requireRole expectedRole userId =
             else
                 rejectRole userId actualRole expectedRole
 
-(* Abort when actorId is the expense owner (no self-approval). *)
+(* Stop with an error if the person acting is the same person who submitted the expense. *)
 fun requireNotOwner actorId ownerId =
     if not (canActOnExpense actorId ownerId) then
         (Log.warn "policy"

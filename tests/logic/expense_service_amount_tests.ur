@@ -1,3 +1,5 @@
+(* Unit tests for amount parsing and the Check amount feedback messages. *)
+
 val groupName = "expense_service_amount"
 
 val validAmountParses =
@@ -18,6 +20,7 @@ val emptyAmountRejected =
            None => True
          | Some _ => False)
 
+(* Read only the message from amountCheckResult. *)
 fun amountCheckMsg amount =
     case Expense_service.amountCheckResult amount of
         (_, msg) => msg
@@ -33,6 +36,7 @@ val amountCheckFailureMessage =
     Test_harness.mkResult "amountCheckResult failure message for RPC feedback"
       (amountCheckMsg "abc" = "Amount must be a valid number (same rule as on submit).")
 
+(* Read only the pass/fail flag from amountCheckResult. *)
 fun amountCheckOk amount =
     case Expense_service.amountCheckResult amount of
         (ok, _) => ok

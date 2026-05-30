@@ -1,15 +1,16 @@
-(* Create a new expense *)
+(* Form to submit a new expense, with checks before and after you click Submit. *)
 
 fun hasRequiredFields r =
     r.Title <> ""
     && r.Amount <> ""
     && r.Category <> ""
 
-(* RPC demo: session + delegate to Expense_service.checkAmount. *)
+(* Server-side handler for the Check amount button. Runs the same amount rules as submit. *)
 fun checkAmountRpc (amount : string) : transaction (bool * string) =
     userId <- Session.requireUser ();
     Expense_service.checkAmount userId amount
 
+(* Builds the success or error message shown after an RPC amount check. *)
 fun amountCheckFeedbackBody okSrc msgSrc =
     ok <- signal okSrc;
     msg <- signal msgSrc;
@@ -23,6 +24,7 @@ fun amountCheckFeedbackBody okSrc msgSrc =
                       <xml><p role="amount-check-err">{[msg]}</p></xml>}
            </xml>
 
+(* Button click handler: read amount from the form, call the server via RPC, store the result. *)
 fun checkAmountClick amountSrc okSrc msgSrc () =
     v <- get amountSrc;
     (ok, msg) <- rpc (checkAmountRpc v);
@@ -45,6 +47,7 @@ fun validationBanner showRequiredMessage showInvalidAmountMessage =
     else
         <xml/>
 
+(* Check amount button, live feedback area, and short note about the RPC demo. *)
 fun amountCheckSection amountSrc okSrc msgSrc =
     <xml>
       <div>
@@ -169,6 +172,7 @@ fun content amountSrc okSrc msgSrc =
       False
       False
 
+(* Create the reactive signals that hold the RPC amount-check result on this page. *)
 fun page () : transaction page =
     amountSrc <- source "";
     okSrc <- source False;

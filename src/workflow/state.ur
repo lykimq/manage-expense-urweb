@@ -1,3 +1,5 @@
+(* The four stages an expense can be in: Submitted, Approved, Rejected, Paid. *)
+
 datatype expense_state = Submitted | Approved | Rejected | Paid
 
 fun stateToString state =

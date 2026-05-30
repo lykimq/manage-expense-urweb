@@ -1,3 +1,5 @@
+(* Integration tests for create, approve, reject, and pay against the database. *)
+
 open Tables
 
 type create_case_out =
@@ -6,6 +8,7 @@ type create_case_out =
 
 val groupName = "expense_service"
 
+(* Create an expense and check Submitted state plus the first audit row. *)
 fun testCreateCase () : transaction create_case_out =
     expenseId <- Expense_service.create 1
                 {Title = "Integration expense",
@@ -28,6 +31,7 @@ fun testCreateCase () : transaction create_case_out =
                     []}
     end
 
+(* Approve the expense and check Approved state plus a second audit row. *)
 fun testApproveCase expenseId : transaction (list Test_harness.test_result) =
     Expense_service.approve 2 expenseId "Approved by integration test";
     approvedExpenseOpt <- Expense_db.getById expenseId;
@@ -44,6 +48,7 @@ fun testApproveCase expenseId : transaction (list Test_harness.test_result) =
                 [])
     end
 
+(* Mark the expense paid and check Paid state plus a third audit row. *)
 fun testPayCase expenseId : transaction (list Test_harness.test_result) =
     Expense_service.pay 3 expenseId;
     paidExpenseOpt <- Expense_db.getById expenseId;
@@ -60,6 +65,7 @@ fun testPayCase expenseId : transaction (list Test_harness.test_result) =
                 [])
     end
 
+(* Create a separate expense, reject it, then clean up test data. *)
 fun testRejectCase () : transaction (list Test_harness.test_result) =
     rejectedId <- Expense_service.create 1
                  {Title = "Integration reject expense",
@@ -82,6 +88,7 @@ fun testRejectCase () : transaction (list Test_harness.test_result) =
                 [])
     end
 
+(* Run the full submit-approve-pay path, then a separate reject case. *)
 fun runAll () : transaction (list Test_harness.test_result) =
     createOut <- testCreateCase ();
     approveResults <- testApproveCase createOut.ExpenseId;

@@ -1,5 +1,8 @@
+(* Integration tests for expense detail load, owner name, and audit history. *)
+
 open Tables
 
+(* True when the audit list includes a move from oldState to newState. *)
 fun hasTransition oldState newState entries =
     case entries of
         [] => False
@@ -17,6 +20,7 @@ fun allActorNamesPresent entries =
       | entry :: rest =>
         entry.ActorName <> "" && allActorNamesPresent rest
 
+(* Create and approve an expense, then check detail payload and audit rows. *)
 fun runAll () : transaction (list Test_harness.test_result) =
     expenseId <- Expense_service.create 1
                  {Title = "Detail service expense",

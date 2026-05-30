@@ -1,3 +1,5 @@
+(* Load one expense with the owner name and full change history for the detail page. *)
+
 fun actorName actorId =
     userOpt <- User_db.getById actorId;
     return (case userOpt of

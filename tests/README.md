@@ -12,9 +12,9 @@ single test entry point (`tests/test_main.ur`) that is run through `make test`.
 
 Tests are split by concern:
 
-- `tests/logic/`: pure rule checks (state, transitions, policy, session)
-- `tests/integration/`: service-level checks using real DB operations on a
-  dedicated test database (`expense_test_db`)
+- `tests/logic/`: pure rule checks with no database (state, transitions, amount parsing, form validation)
+- `tests/integration/`: checks using real DB operations and cookies on a dedicated test database
+  (`expense_test_db`), including auth (policy, session) and service workflows
 - `tests/http.urp` + `tests/http_checks.sh`: HTTP-level checks for redirects,
   login/logout flow, and queue access denial behavior
 
@@ -57,11 +57,11 @@ Logic tests:
 - `expense_service_amount_tests`: `parseAmountValue` and `amountCheckResult`
   (valid number, amount must be > 0; server side of create-expense **Check amount** RPC)
 - `create_expense_validation_tests`: `hasRequiredFields` on the create form
-- `policy_tests`: role matching and owner/non-owner checks via Policy module
-- `session_tests`: Session module checks (login, logout, cookie helpers)
 
 Integration tests:
 
+- `policy_tests`: role checks and owner/non-owner rules against seeded users
+- `session_tests`: login, logout, session cookies, and login error flash
 - `expense_service_tests`: create -> approve/pay/reject flows and audit rows
 - `dashboard_service_tests`: role-based workspace and queue data
 - `detail_service_tests`: detail payload, owner name, audit timeline shape

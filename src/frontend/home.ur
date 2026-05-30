@@ -1,3 +1,5 @@
+(* Main page after login: greeting and a table of expenses for your role. *)
+
 fun renderUserCard info =
     <xml>
       <article>
