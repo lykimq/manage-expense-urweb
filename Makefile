@@ -109,7 +109,7 @@ web: check-db $(EXE)
 		echo "Change detected. Rebuilding app..."; \
 	done
 
-# Use make -j2 test in CI so tests/test.exe and tests/http.exe build in parallel.
+# CI uses make -j3 test (test-db + both exes in parallel on a 2-vCPU runner).
 test: test-db $(TEST_EXE)
 	$(TEST_RUN)
 

@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -79,13 +80,18 @@ jobs:
       - name: Run tests
         run: |
           pg_isready -h localhost -U postgres -d postgres
-          ccache -z
+          start=$(date +%s)
           if [ "${{ steps.urweb-build-cache.outputs.cache-hit }}" = "true" ]; then
-            echo "Ur/Web build cache hit; skipping compile."
+            echo "Ur/Web build cache hit; expect ~1-2 min (test-db + run tests only)."
             touch tests/test.exe tests/http.exe
+            make test-db
+            bash tests/run.sh
           else
-            echo "Ur/Web build cache miss; compiling tests/test.exe and tests/http.exe in parallel (~5-10 min on a 2-vCPU runner)."
-            echo "test-db applies committed schema/schema.sql only (no urweb app sqlify)."
+            echo "Ur/Web build cache miss; compiling sequentially (~7-10 min on 2-vCPU runner)."
+            make test-db
+            make tests/test.exe URWEB_CCOMPILER='ccache gcc'
+            make tests/http.exe URWEB_CCOMPILER='ccache gcc'
+            bash tests/run.sh
           fi
-          make -j2 test URWEB_CCOMPILER='ccache gcc'
+          echo "Run tests step: $(( $(date +%s) - start ))s"
           ccache -s
