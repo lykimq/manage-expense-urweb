@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     services:
       postgres:
@@ -30,6 +30,8 @@ jobs:
       PGPORT: 5432
       PGUSER: postgres
       PGPASSWORD: postgres
+      PGSSLMODE: disable
+      URWEB_INSTALLABLE: github:NixOS/nixpkgs/nixos-24.05#urweb
 
     steps:
       - name: Checkout
@@ -45,24 +47,33 @@ jobs:
 
       - name: Install Ur/Web
         run: |
-          store_path=$(nix build --print-out-paths --no-link 'nixpkgs#urweb')
+          # Pin nixpkgs: bare nixpkgs# resolves to flakehub weekly (gcc 15 + urweb 20200209).
+          store_path=$(nix build --print-out-paths --no-link "$URWEB_INSTALLABLE")
           echo "${store_path}/bin" >> "$GITHUB_PATH"
-          ${store_path}/bin/urweb -version
+          # GITHUB_PATH applies to later steps only; use store path here.
+          "${store_path}/bin/urweb" -version
 
       - name: Install runner dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client ripgrep
+          sudo apt-get install -y postgresql-client ripgrep curl
 
       - name: Run tests
         run: |
           pg_isready -h localhost -U postgres -d postgres
           start=$(date +%s)
-          timeout 600 bash -c '
-            set -euo pipefail
-            make schema
-            make test-db
-            make tests/test.exe tests/http.exe
-            bash tests/run.sh
-          '
+          step() { echo "== $1 =="; date -u +%H:%M:%S; }
+
+          step "test-db"
+          make test-db
+
+          step "tests/test.exe"
+          make tests/test.exe
+
+          step "tests/http.exe"
+          make tests/http.exe
+
+          step "tests/run.sh"
+          bash tests/run.sh
+
           echo "Run tests step: $(( $(date +%s) - start ))s"

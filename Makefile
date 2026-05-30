@@ -109,7 +109,6 @@ web: check-db $(EXE)
 		echo "Change detected. Rebuilding app..."; \
 	done
 
-# CI: make schema test-db tests/test.exe tests/http.exe, then tests/run.sh.
 test: test-db $(TEST_EXE)
 	$(TEST_RUN)
 
