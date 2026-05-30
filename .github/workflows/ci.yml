@@ -57,18 +57,5 @@ jobs:
         run: |
           pg_isready -h localhost -U postgres -d postgres
           start=$(date +%s)
-          step() { echo "== $1 =="; date -u +%H:%M:%S; }
-
-          step "test-db"
-          make test-db
-
-          step "tests/test.exe"
-          make tests/test.exe
-
-          step "tests/http.exe"
-          make tests/http.exe
-
-          step "tests/run.sh"
-          bash tests/run.sh
-
+          make test
           echo "Run tests step: $(( $(date +%s) - start ))s"
